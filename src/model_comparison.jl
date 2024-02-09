@@ -22,7 +22,7 @@ struct ModelComparison{T<:Real, MTuple<:Tuple, OTuple<:Tuple, N, M, PTuple<:Tupl
     times::Vector{T}
     volumes::Vector{T}
     models::MTuple
-    n_holdout::Int
+    holdouts::Int
     options::OTuple
     n_iterations::NTuple{N,Int64}
     metric::M
@@ -32,7 +32,7 @@ struct ModelComparison{T<:Real, MTuple<:Tuple, OTuple<:Tuple, N, M, PTuple<:Tupl
         times::Vector{T},
         volumes::Vector{T},
         models;
-        n_holdout=3,
+        holdouts=3,
         calibration_options = options.(models),
         n_iterations = n_iterations.(models),
         metric=mae,
@@ -48,7 +48,7 @@ struct ModelComparison{T<:Real, MTuple<:Tuple, OTuple<:Tuple, N, M, PTuple<:Tupl
                 times,
                 volumes,
                 _models,
-                n_holdout,
+                holdouts,
                 _options,
                 n_iterations;
                 plot,
@@ -59,7 +59,7 @@ struct ModelComparison{T<:Real, MTuple<:Tuple, OTuple<:Tuple, N, M, PTuple<:Tupl
             times,
             volumes,
             _models,
-            n_holdout,
+            holdouts,
             _options,
             Tuple(n_iterations),
             metric,
@@ -70,10 +70,10 @@ struct ModelComparison{T<:Real, MTuple<:Tuple, OTuple<:Tuple, N, M, PTuple<:Tupl
 end
 
 """
-    compare(times, volumes, models; n_holdout=3, metric=mae, advanced_options...)
+    compare(times, volumes, models; holdouts=3, metric=mae, advanced_options...)
 
 By calibrating `models` using the specified patient `times` and lesion `volumes`, compare
-those models using a hold-out set consisting of the last `n_holdout` data points.
+those models using a hold-out set consisting of the last `holdouts` data points.
 
 ```julia
 times = [0.1, 6.0, 16.0, 24.0, 32.0, 39.0]
@@ -103,10 +103,10 @@ plot(comparison, title="A comparison of two models")
 
 # Keyword options
 
-- `n_holdout=3`: number of time-volume pairs excluded from the end of the calibration data
+- `holdouts=3`: number of time-volume pairs excluded from the end of the calibration data
 
 - `metric=mae`: metric applied to holdout set; the reported error on a model predicting
-  volumes `v̂` is `metric(v̂, v)` where `v` is the last `n_holdout` values of `volumes`. For
+  volumes `v̂` is `metric(v̂, v)` where `v` is the last `holdouts` values of `volumes`. For
   example, any regression measure from StatisticalMeasures.jl can be used here. The
   built-in fallback is mean absolute error.
 
@@ -142,10 +142,10 @@ calls to [`compare`](@ref).
 parameters(comparison::ModelComparison) = comparison.parameters
 
 
-function errors(etimes, evolumes, models, n_holdout, options, n_iterations; plot=false)
+function errors(etimes, evolumes, models, holdouts, options, n_iterations; plot=false)
 
-    times = etimes[1:end-n_holdout]
-    volumes = evolumes[1:end-n_holdout]
+    times = etimes[1:end-holdouts]
+    volumes = evolumes[1:end-holdouts]
 
     i = 0
     error_param_pairs = map(models) do model
@@ -160,7 +160,7 @@ function errors(etimes, evolumes, models, n_holdout, options, n_iterations; plot
         outcomes = solve!(problem, controls...)
         p = solution(problem)
         v̂ = model(etimes, p)
-        error = mae(v̂[end-n_holdout+1:end], evolumes[end-n_holdout+1:end])
+        error = mae(v̂[end-holdouts+1:end], evolumes[end-holdouts+1:end])
         (error, p)
     end
 
@@ -169,7 +169,7 @@ function errors(etimes, evolumes, models, n_holdout, options, n_iterations; plot
 end
 
 function Base.show(io::IO, comparison::ModelComparison)
-    println(io, "ModelComparison with $(comparison.n_holdout) holdouts:")
+    println(io, "ModelComparison with $(comparison.holdouts) holdouts:")
     print(io, "  metric: $(comparison.metric)")
     for (i, model) in enumerate(comparison.models)
         error = round(comparison.errors[i], sigdigits=4)
