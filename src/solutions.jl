@@ -80,7 +80,7 @@ end
 
 Return volumes for specified `times`, based on numerical solutions to a two-dimensional
 extension of generalized Bertalanffy model for lesion growth. Here $(DOC_PARAMS(5,
-:berta_ode)).
+:berta_ode!)).
 
 The usual generalized Bertalanffy model is recovered when `γ=0`. In that case, using
 [`bertalanffy`](@ref), which is based on an analytic solution, may be preferred.

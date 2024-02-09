@@ -123,7 +123,22 @@ See also [`errors`](@ref), [`parameters`](@ref).
 """
 compare(args...; kwargs...) = ModelComparison(args...; kwargs...)
 
+"""
+    errors(comparison)
+
+Extract the the vector of errors from a `ModelComparison` object, as returned by
+calls to [`compare`](@ref).
+
+"""
 errors(comparison::ModelComparison) = comparison.errors
+
+"""
+    errors(comparison)
+
+Extract the the vector of errors from a `ModelComparison` object, as returned by
+calls to [`compare`](@ref).
+
+"""
 parameters(comparison::ModelComparison) = comparison.parameters
 
 
