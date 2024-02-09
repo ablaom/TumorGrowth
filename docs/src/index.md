@@ -1,6 +1,6 @@
-TumorGrowth.jl provides the following models (ODE solvers) for tumor growth:
-
 # Overview
+
+TumorGrowth.jl provides the following models (ODE solvers) for tumor growth:
 
 | model                           | description                             | parameters, `p`       | analytic? | ODE                                   |
 |:--------------------------------|:----------------------------------------|:----------------------|:----------|:--------------------------------------|
