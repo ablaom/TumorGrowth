@@ -43,7 +43,7 @@ bertalanffy(extended_times, p)
 And compare several models on a holdout set:
 
 ```@example overview
-comparison = compare(times, volumes, [bertalanffy, logistic, berta], n_holdout=2)
+comparison = compare(times, volumes, [bertalanffy, logistic, bertalanffy2], n_holdout=2)
 ```
 
 ```julia

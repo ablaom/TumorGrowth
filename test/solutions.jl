@@ -17,9 +17,9 @@ reltol = 1e-8
     @test all(abs.(deviations) .< tolerance)
 end
 
-@testset "`bertalanffy` and `berta2` ageee when γ = 0" begin
+@testset "`bertalanffy` and `bertalanffy2` ageee when γ = 0" begin
     deviations =
-        bertalanffy(times, p) - berta(times, merge(p, (; γ=0.0)); abstol, reltol)
+        bertalanffy(times, p) - bertalanffy2(times, merge(p, (; γ=0.0)); abstol, reltol)
     @test all(abs.(deviations) .< tolerance)
 end
 

@@ -32,7 +32,7 @@ function bertalanffy_ode(v, p, t)
 end
 
 """
-    berta_ode!(dX, X, p, t)
+    bertalanffy2_ode!(dX, X, p, t)
 
 A two-dimensional extension of the generalized TumorGrowth.model for lesion growth (see
 [`bertalanffy_ode`](@ref)). Here `X = [v, u]`, where `v` is volume at time `t` and `u` is
@@ -58,7 +58,7 @@ model when also ``γ = 0``.
 Since `u` is a latent variable, its initial value is an additional model parameter.
 
 """
-function berta_ode!(dX, X, p, t)
+function bertalanffy2_ode!(dX, X, p, t)
     ω, λ, γ = p
     dX[2] = γ*ω*X[2]
     dX[1] = boxcox(λ, X[2]/X[1])*ω*X[1]

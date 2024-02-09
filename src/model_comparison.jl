@@ -13,7 +13,7 @@ options(model::TumorGrowth.Neural) =
     (; learning_rate=0.01, frozen=(; v∞=nothing))
 
 n_iterations(model) = 10000
-n_iterations(::typeof(berta)) = 20000
+n_iterations(::typeof(bertalanffy2)) = 20000
 n_iterations(::TumorGrowth.Neural) = 1500
 
 mae(ŷ, y) = abs.(ŷ .- y) |> mean

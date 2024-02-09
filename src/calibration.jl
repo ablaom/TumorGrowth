@@ -29,7 +29,7 @@ function guess_parameters(times, volumes, ::ClassicalModel)
 end
 guess_parameters(times, volumes, ::OneDimensionalModel) =
         merge(guess_parameters(times, volumes, gompertz), (; λ=1/3))
-function guess_parameters(times, volumes, ::typeof(berta))
+function guess_parameters(times, volumes, ::typeof(bertalanffy2))
     κ = 0.5*sign(TumorGrowth.curvature(times, volumes))
     fallback =  merge(guess_parameters(times, volumes, bertalanffy), (; γ=κ))
 
@@ -70,7 +70,7 @@ function scale_function(times, volumes, model::OneDimensionalModel)
     time_scale = 1/abs(p.ω)
     return p -> (v0=volume_scale*p.v0, v∞=volume_scale*p.v∞, ω=p.ω/time_scale, λ=p.λ)
 end
-function scale_function(times, volumes, model::typeof(berta))
+function scale_function(times, volumes, model::typeof(bertalanffy2))
     p = guess_parameters(times, volumes, model)
     volume_scale = abs(p.v∞)
     time_scale = 1/abs(p.ω)
@@ -89,7 +89,7 @@ constraint_function(model) = _ -> true
 constraint_function(model::Union{
         ClassicalModel,
         OneDimensionalModel,
-        typeof(berta),
+        typeof(bertalanffy2),
 }) = p -> p.v0 > 0 && p.v∞ > 0
 
 
@@ -127,7 +127,7 @@ end
 Specify a problem concerned with optimizing the parameters of a tumor growth `model`,
 given measured `volumes` and corresponding `times`.
 
-Here `model` can be one of: `bertalanffy`, `bertalanffy_numerical`, `berta`, `gompertz`,
+Here `model` can be one of: `bertalanffy`, `bertalanffy_numerical`, `bertalanffy2`, `gompertz`,
 `logistic`, `classical_bertalanffy`.
 
 Default optimisation is by Adam gradient descent, using a sum of squares loss. Call
@@ -204,7 +204,7 @@ models:
 |:--------------------------------|:----------------------------------------|:----------------------|:----------|:--------------------------------------|
 | [`bertalanffy`](@ref)           | generalized Bertalanffy (GB)            | `(; v0, v∞, ω, λ)`    | yes       | [`TumorGrowth.bertalanffy_ode`](@ref) |
 | [`bertalanffy_numerical`](@ref) | generalized Bertalanffy (testing only)  | `(; v0, v∞, ω, λ)`    | no        | [`TumorGrowth.bertalanffy_ode`](@ref) |
-| [`berta`](@ref)                 | 2D extension of generalized Bertalanffy | `(; v0, v∞, ω, λ, γ)` | no        | [`TumorGrowth.berta_ode!`](@ref)      |
+| [`bertalanffy2`](@ref)                 | 2D extension of generalized Bertalanffy | `(; v0, v∞, ω, λ, γ)` | no        | [`TumorGrowth.bertalanffy2_ode!`](@ref)      |
 | [`gompertz`](@ref)              | Gompertz (GB, `λ=0`)                    | `(; v0, v∞, ω)`       | yes       | [`TumorGrowth.bertalanffy_ode`](@ref) |
 | [`logistic`](@ref)              | logistic/Verhulst (GB, `λ=-1`)          | `(; v0, v∞, ω)`       | yes       | [`TumorGrowth.bertalanffy_ode`](@ref) |
 | [`classical_bertalanffy`](@ref) | classical Bertalanffy (GB, `λ=1/3`)     | `(; v0, v∞, ω)`       | yes       | [`TumorGrowth.bertalanffy_ode`](@ref) |

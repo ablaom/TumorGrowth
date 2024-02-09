@@ -24,7 +24,7 @@ end
 Return volumes for specified `times`, based on the analytic solution to the generalized
     Bertalanffy model for lesion growth.  $(DOC_PARAMS(4, :bertalanffy_ode)).
 
-See also [`berta`](@ref).
+See also [`bertalanffy2`](@ref).
 
 """
 function bertalanffy(times, p)
@@ -51,7 +51,7 @@ to this function.
 
     It is assumed without checking that `times` is ordered: `times == sort(times)`.
 
-See also [`berta`](@ref).
+See also [`bertalanffy2`](@ref).
 
 """
 function bertalanffy_numerical(
@@ -76,11 +76,11 @@ function bertalanffy_numerical(
 end
 
 """
-    berta(times, p; aspirational=false, solve_kwargs...)
+    bertalanffy2(times, p; aspirational=false, solve_kwargs...)
 
 Return volumes for specified `times`, based on numerical solutions to a two-dimensional
 extension of generalized Bertalanffy model for lesion growth. Here $(DOC_PARAMS(5,
-:berta_ode!)).
+:bertalanffy2_ode!)).
 
 The usual generalized Bertalanffy model is recovered when `γ=0`. In that case, using
 [`bertalanffy`](@ref), which is based on an analytic solution, may be preferred.
@@ -100,7 +100,7 @@ The usual generalized Bertalanffy model is recovered when `γ=0`. In that case, 
 See also [`bertalanffy`](@ref).
 
 """
-function berta(
+function bertalanffy2(
     times,
     p;
     aspirational=false,
@@ -120,7 +120,7 @@ function berta(
     tspan = (times[1], times[end])
     q0 = [v0/v∞, 1.0]
     p = [ω, λ, γ]
-    problem = DE.ODEProblem(berta_ode!, q0, tspan, p)
+    problem = DE.ODEProblem(bertalanffy2_ode!, q0, tspan, p)
     solution = DE.solve(problem, DE.Tsit5(); saveat, reltol, sensealg, kwargs...)
     # return to original scale:
     aspirational || return v∞ .* first.(solution.u)
@@ -141,7 +141,7 @@ model for lesion growth. $(DOC_PARAMS(3, bertalanffy_ode)).
 
 This is the `λ=0` case of the [`bertalanffy`](@ref) model.
 
-See also [`bertalanffy`](@ref), [`berta`](@ref).
+See also [`bertalanffy`](@ref), [`bertalanffy2`](@ref).
 
 """
 gompertz(times, p) = bertalanffy(times, _merge(p, (; λ=0.0)))
@@ -154,7 +154,7 @@ Return volumes for specified `times`, based on anaytic solutions to the classica
 
 This is the `λ=-1` case of the [`bertalanffy`](@ref) model.
 
-See also [`bertalanffy`](@ref), [`berta`](@ref).
+See also [`bertalanffy`](@ref), [`bertalanffy2`](@ref).
 
 """
 logistic(times, p) = bertalanffy(times, _merge(p, (; λ=-1.0)))
@@ -168,7 +168,7 @@ Bertalanffy model for lesion growth. $(DOC_PARAMS(3, bertalanffy_ode)).
 
 This is the `λ=1/3` case of the [`bertalanffy`](@ref) model.
 
-See also [`bertalanffy`](@ref), [`berta`](@ref).
+See also [`bertalanffy`](@ref), [`bertalanffy2`](@ref).
 
 """
 classical_bertalanffy(times, p) = bertalanffy(times, _merge(p, (; λ=1/3)))

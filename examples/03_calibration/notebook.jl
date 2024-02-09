@@ -130,7 +130,7 @@ gui()
 problem = CalibrationProblem(
     times,
     volumes,
-    berta;
+    bertalanffy2;
     frozen = (; λ=1/5),
     learning_rate=0.001,
     half_life=21,
@@ -142,7 +142,7 @@ solve!(
     InvalidValue(),
     NumberLimit(6000),
 )
-plot!(problem, label="berta, λ fixed")
+plot!(problem, label="bertalanffy2, λ fixed")
 gui()
 
 #-

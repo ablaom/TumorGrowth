@@ -6,12 +6,12 @@ tol = 0.001
 rng= StableRNG(127)
 p_true = rand(rng, 5)
 times = rand(rng, 5) |> sort
-volumes_true = berta(times, p_true)
+volumes_true = bertalanffy2(times, p_true)
 problem = CalibrationProblem(
     times,
     volumes_true;
     frozen = (; λ=p_true[4]),
-    model=berta,
+    model=bertalanffy2,
     learning_rate=0.1,
 )
 l(p) = maximum(abs.(p_true - p))
