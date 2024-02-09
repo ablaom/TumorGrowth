@@ -75,7 +75,7 @@ for (i, record) in enumerate(records6)
         # Note well the zero-initialization of weights in first layer:
 
         rng = Xoshiro(123)
-        model = neural(rng, network)
+        model = neural2(rng, network)
 
         # Note the reduced learning rate.
 

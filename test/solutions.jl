@@ -23,10 +23,10 @@ end
     @test all(abs.(deviations) .< tolerance)
 end
 
-@testset "`Neural` objects" begin
+@testset "`Neural2` objects" begin
     rng = StableRNG(127)
     network = Lux.Dense(2, 2, identity)
-    model = neural(rng, network)
+    model = neural2(rng, network)
     θ = TumorGrowth.initial_parameters(model)
     times = [0.0, 0.01, 0.1, 1.0, 10.0]
     v0, v∞ = 0.00023, 0.00015
@@ -40,7 +40,7 @@ end
     end
     volumes = first.(Xs) .* v∞
 
-    # compare with applying `Neural` object:
+    # compare with applying `Neural2` object:
     volumes2 = model(times, (; v0, v∞, θ))
 
     @test isapprox(volumes, volumes2, rtol=1e-6)

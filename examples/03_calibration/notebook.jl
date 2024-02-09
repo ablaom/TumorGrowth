@@ -147,7 +147,7 @@ gui()
 
 #-
 
-# And finally, we'll try a neural ODE model, with fixed volume scale `v∞`.
+# And finally, we'll try a neural2 ODE model, with fixed volume scale `v∞`.
 
 using Lux, Random
 
@@ -158,7 +158,7 @@ network = Chain(
     Dense(5, 2),
 )
 rng = Xoshiro(123)
-model = neural(rng, network)
+model = neural2(rng, network)
 
 n = Lux.parameterlength(network)
 
@@ -185,7 +185,7 @@ solve!(
 plot!(
     problem,
     title = "Model comparison for a patient",
-    label = "neural",
+    label = "neural2",
     legend=:inside,
 )
 gui()

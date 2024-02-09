@@ -76,7 +76,7 @@ state(ode::NeuralODE) = ode.state
 """
    neural_ode([rng,] network)
 
-Initialize the Lux.jl neural network, `network`, and return an associated ODE, `ode`, with
+Initialize the Lux.jl neural2 network, `network`, and return an associated ODE, `ode`, with
 calling syntax `dX_dt = ode(X, p, t)`, where `p` is a `network`-compatible parameter.
 
 The initialized parameter value can be recovered with

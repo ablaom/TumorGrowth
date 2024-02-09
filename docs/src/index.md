@@ -10,7 +10,7 @@ TumorGrowth.jl provides the following models (ODE solvers) for tumor growth:
 | [`gompertz`](@ref)              | Gompertz (GB, `λ=0`)                    | `(; v0, v∞, ω)`       | yes       | [`TumorGrowth.bertalanffy_ode`](@ref)   |
 | [`logistic`](@ref)              | logistic/Verhulst (GB, `λ=-1`)          | `(; v0, v∞, ω)`       | yes       | [`TumorGrowth.bertalanffy_ode`](@ref)   |
 | [`classical_bertalanffy`](@ref) | classical Bertalanffy (GB, `λ=1/3`)     | `(; v0, v∞, ω)`       | yes       | [`TumorGrowth.bertalanffy_ode`](@ref)   |
-| [`neural(rng, network)`](@ref)  | neural ODE with Lux.jl `network`        | `(; v0, v∞, θ)`       | no        | [`TumorGrowth.neural_ode`](@ref)        |
+| [`neural2(rng, network)`](@ref) | neural2 ODE with Lux.jl `network`       | `(; v0, v∞, θ)`       | no        | [`TumorGrowth.neural_ode`](@ref)        |
 
 The models predict a sequence of lesion volumes, given times and parameters:
 

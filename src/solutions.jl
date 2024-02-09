@@ -173,15 +173,15 @@ See also [`bertalanffy`](@ref), [`bertalanffy2`](@ref).
 """
 classical_bertalanffy(times, p) = bertalanffy(times, _merge(p, (; λ=1/3)))
 
-mutable struct Neural{O}
+mutable struct Neural2{O}
     ode::O
 end
 
 """
-    neural([rng,] network)
+    neural2([rng,] network)
 
-Initialize the Lux.jl neural network, `network`, and return a callable object, `model`,
-for solving the associated neural ODE for volume growth, as detailed under "The ODE"
+Initialize the Lux.jl neural2 network, `network`, and return a callable object, `model`,
+for solving the associated neural2 ODE for volume growth, as detailed under "The ODE"
 below.
 
 !!! important
@@ -204,11 +204,11 @@ default initial value used when solving an associated [`CalibrationProblem`](@re
 ```julia
 using Lux, Random
 
-# define neural network with 2 inputs and 2 outputs:
+# define neural2 network with 2 inputs and 2 outputs:
 network = Lux.Chain(Dense(2, 3, Lux.tanh; init_weight=Lux.zeros64), Dense(3, 2))
 
 rng = Xoshiro(123)
-model = neural(rng, network)
+model = neural2(rng, network)
 θ = TumorGrowth.initial_parameters(model)
 times = [0.1, 6.0, 16.0, 24.0, 32.0, 39.0]
 v0, v∞ = 0.00023, 0.00015
@@ -231,25 +231,25 @@ julia> volumes = model(times, p) # (constant because of zero-initialization)
 See also [`TumorGrowth.neural_ode`](@ref).
 
 """
-neural(args...) = Neural(neural_ode(args...))
-initial_parameters(model::Neural) = initial_parameters(model.ode)
-state(model::Neural) = state(model.ode)
+neural2(args...) = Neural2(neural_ode(args...))
+initial_parameters(model::Neural2) = initial_parameters(model.ode)
+state(model::Neural2) = state(model.ode)
 
-function Base.show(io::IO, ::MIME"text/plain", model::Neural)
+function Base.show(io::IO, ::MIME"text/plain", model::Neural2)
     n = Lux.parameterlength(model.ode.θ0)
     print(
         io,
-        "Neural model, (times, v0, v∞, θ) -> volumes, where length(θ) = $n",
+        "Neural2 model, (times, v0, v∞, θ) -> volumes, where length(θ) = $n",
     )
 end
-function Base.show(io::IO, model::Neural)
+function Base.show(io::IO, model::Neural2)
     n = Lux.parameterlength(model.ode.θ0)
-    print(io, "neural ($(n + 2) params)")
+    print(io, "neural2 ($(n + 2) params)")
 end
 
 relu(x::T) where T<:Number = x < 0 ? zero(T) : x
 
-function (model::Neural)(
+function (model::Neural2)(
     times,
     v0,
     v∞,
@@ -271,4 +271,4 @@ function (model::Neural)(
     # return to original scale:
     return v∞*relu.(first.(solution.u))
 end
-(model::Neural)(times, p; kwargs...) = model(times, p.v0, p.v∞, p.θ; kwargs...)
+(model::Neural2)(times, p; kwargs...) = model(times, p.v0, p.v∞, p.θ; kwargs...)
