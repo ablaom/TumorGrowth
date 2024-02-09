@@ -1,7 +1,6 @@
 # TumorGrowth.jl
 
-A package providing simple predictive models for tumor growth and tools to apply them to
-clinical data.
+Simple predictive models for tumor growth, and tools to apply them to clinical data.
 
 ## Overview
 
