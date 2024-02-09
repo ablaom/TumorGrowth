@@ -18,12 +18,12 @@ The models predict a sequence of lesion volumes, given times and parameters:
 using TumorGrowth
 
 times = times = [0.1, 6.0, 16.0, 24.0, 32.0, 39.0]
-p = (v0=0.0002261, v∞=2.792e-5,  ω=0.05731) # `v0` is the intial volume
+p = (v0=0.0002261, v∞=2.792e-5,  ω=0.05731) # `v0` is the initial volume
 gompertz(times, p)
 ```
 
 The underlying ODEs are solved under the hood, if an analytic solution is not known.
 
 TumorGrowth.jl also provides a [`CalibrationProblem`](@ref) tool to calibrate model
-parameters, given a history of measurments, and a [`compare`](@ref) tool to compare models
+parameters, given a history of measurements, and a [`compare`](@ref) tool to compare models
 on a holdout set.

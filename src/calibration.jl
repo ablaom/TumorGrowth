@@ -6,7 +6,7 @@ const ERR_UNRECOGNIZED_KEY = ArgumentError(
 )
 
 
-# # HEURISTICS TO GUESS INTITIAL PARAMETER VALUES AND THEIR SCALES
+# # HEURISTICS TO GUESS INITIAL PARAMETER VALUES AND THEIR SCALES
 
 const OneDimensionalModel =
         Union{typeof(bertalanffy),typeof(bertalanffy_numerical)}
@@ -93,7 +93,7 @@ constraint_function(model::Union{
 }) = p -> p.v0 > 0 && p.v∞ > 0
 
 
-# # PENATLY HELPER
+# # PENALTY HELPER
 
 @inline function factor(p, penalty)
     a, b = p.v0, p.v∞

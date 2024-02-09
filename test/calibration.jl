@@ -86,7 +86,7 @@ function normalized_absolute_difference(yhat, y)
 end
 mape(yhat, y) = sum(broadcast(normalized_absolute_difference, yhat, y))/length(y)
 
-@testset "CallibrationProblem" begin
+@testset "CalibrationProblem" begin
 
     # test calibration using berta:
     tol = 0.3

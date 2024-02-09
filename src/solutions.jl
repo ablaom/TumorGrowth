@@ -8,7 +8,7 @@ bertalanffy_analytic_solution(t, v0, v∞, ω, λ) =
 
 # # FUNCTIONS RETURNING SOLUTIONS TO THE ODES
 
-# A *solution* maps times, an intial condition `v0` and ODE parameters to volumes.
+# A *solution* maps times, an initial condition `v0` and ODE parameters to volumes.
 
 function DOC_PARAMS(k, ode)
     params = map(sym -> "`$sym`", [:v0, :v∞, :ω, :λ, :γ][1:k])
@@ -214,7 +214,7 @@ times = [0.1, 6.0, 16.0, 24.0, 32.0, 39.0]
 v0, v∞ = 0.00023, 0.00015
 p = (; v0, v∞, θ)
 
-julia> volumes = model(times, p) # (constant because of zero-intialization)
+julia> volumes = model(times, p) # (constant because of zero-initialization)
 6-element Vector{Float64}:
  0.00023
  0.00023

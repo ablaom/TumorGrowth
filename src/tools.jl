@@ -63,7 +63,7 @@ grab(x::Nothing, y) = y
 *Private method.*
 
 Return a new tuple by replacing any `nothing` values with the corresponding value in the
-`from` tuple, whenver a corresponding key exists, and otherwise not make the replacement.
+`from` tuple, whenever a corresponding key exists, and otherwise not make the replacement.
 
 ```julia
 julia> recover((x=1, y=nothing, z=3, w=nothing), (x=10, y=2, k=7))

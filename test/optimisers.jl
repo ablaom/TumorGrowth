@@ -96,7 +96,7 @@ end
     @test abs.(p.b[1] - p_true.b[1]) < 0.001
     @test abs.(p.c[1] - p_true.c[1]) < 0.001
 
-    # test reproducability
+    # test reproducibility
     problem =
         TumorGrowth.CurveOptimisationProblem(xs, ys, F, p0, learning_rate=0.1)
     solve!(

@@ -125,7 +125,7 @@ solve!(
 plot(problem, label="bertalanffy, λ fixed")
 gui()
 
-# Let's try the 2D generalizaton of the TumorGrowth.model, still fixing `λ`:
+# Let's try the 2D generalization of the TumorGrowth.model, still fixing `λ`:
 
 problem = CalibrationProblem(
     times,

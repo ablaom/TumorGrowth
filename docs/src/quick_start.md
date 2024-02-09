@@ -9,7 +9,7 @@ Biology*":
 using TumorGrowth
 
 data = patient_data();
-record = data[16]   # storing all measurments for one lesion
+record = data[16]   # storing all measurements for one lesion
 keys(record)
 ```
 
