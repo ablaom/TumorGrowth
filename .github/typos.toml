@@ -1,0 +1,3 @@
+[default.extend-words]
+# Don't correct "mape" to "map"
+mape = "mape"
