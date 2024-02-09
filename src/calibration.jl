@@ -208,7 +208,7 @@ models:
 | [`gompertz`](@ref)              | Gompertz (GB, `λ=0`)                    | `(; v0, v∞, ω)`       | yes       | [`TumorGrowth.bertalanffy_ode`](@ref) |
 | [`logistic`](@ref)              | logistic/Verhulst (GB, `λ=-1`)          | `(; v0, v∞, ω)`       | yes       | [`TumorGrowth.bertalanffy_ode`](@ref) |
 | [`classical_bertalanffy`](@ref) | classical Bertalanffy (GB, `λ=1/3`)     | `(; v0, v∞, ω)`       | yes       | [`TumorGrowth.bertalanffy_ode`](@ref) |
-| [`neural(rng, network)`](@ref)  | neural ODE with Lux.jl `network`        | `(; v0, v∞, θ)`       | no        | [`TumorGrowth.nerual_ode`](@ref) |
+| [`neural(rng, network)`](@ref)  | neural ODE with Lux.jl `network`        | `(; v0, v∞, θ)`       | no        | [`TumorGrowth.neural_ode`](@ref) |
 
 In every case `v0` is the initial volume (so that `predicted_volumes[1] == v0`). Note this
 can be different from `volumes[1]`.

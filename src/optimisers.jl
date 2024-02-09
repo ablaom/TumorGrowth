@@ -154,7 +154,7 @@ solution(c::CurveOptimisationProblem) =
 """
     solve!(problem, n)
 
-Solve a calibration `problem`, as constructed with [`CallibrationProblem`](@ref). The
+Solve a calibration `problem`, as constructed with [`CalibrationProblem`](@ref). The
 calibrated parameters are then returned by `solution(problem)`.
 
 ---
@@ -172,7 +172,7 @@ solve!(args...; kwargs...) = IterationControl.train!(args...; kwargs...)
     loss(problem)
 
 Return the sum of squares loss for a calibration `problem`, as constructed with
-[`CallibrationProblem`](@ref).
+[`CalibrationProblem`](@ref).
 
 """
 loss(args...; kwargs...) = IterationControl.loss(args...; kwargs...)

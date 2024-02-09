@@ -14,7 +14,7 @@ given by
 
 `` dv/dt = ω((v∞/v)^λ - 1)/λ)v; v>0``
 
-where `[v∞, ω, λ] == p` are paramters::
+where `[v∞, ω, λ] == p` are parameters::
 
 -  ``v∞`` is the steady state solution, stable and unique, assuming ``ω > 0``
 - ``1/ω`` has the units of time

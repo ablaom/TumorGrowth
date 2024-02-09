@@ -5,7 +5,8 @@ makedocs(;
          modules=[TumorGrowth,],
          format=Documenter.HTML(),
          pages=[
-             "Quick start" => "index.md",
+             "Overview" => "index.md",
+             "Quick start" => "quick_start.md",
              "Reference" => "reference.md",
              ],
          sitename="TumorGrowth",
