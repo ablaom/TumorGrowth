@@ -90,8 +90,17 @@ julia> errors(comparison)
  2.197843662660861e-6
  6.549858321487298e-6
 
-julia> parameters(comparison)[1]
+julia> p = parameters(comparison)[1]  # calibrated parameter for `gompertz`
 (v0 = 0.00022643603114569068, v∞ = 3.8453274218216947e-5, ω = 0.11537512108224635)
+
+julia> gompertz(times, p)
+6-element Vector{Float64}:
+ 0.00022643603114569068
+ 9.435316392754094e-5
+ 5.1039159299783234e-5
+ 4.303209015899451e-5
+ 4.021112910411027e-5
+ 3.922743006690166e-5
 ```
 
 # Visualing comparisons
@@ -114,8 +123,8 @@ plot(comparison, title="A comparison of two models")
   calibration of `models`
 
 - `options=TumorGrowth.options.(models)`: a vector of named tuples providing the keyword
-  arguments `CalibrationProblem`s - one for each model. See [`CalibrationProblem`](@ref)
-  for details.
+  arguments for `CalibrationProblem`s - one for each model. See
+  [`CalibrationProblem`](@ref) for details.
 
 
 See also [`errors`](@ref), [`parameters`](@ref).
