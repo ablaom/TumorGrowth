@@ -14,3 +14,4 @@ The datasets provided the TumorGrowth.jl software are sourced from Laleh et
 al. [(2022)](https://doi.org/10.1371/journal.pcbi.1009822) "Classical mathematical models
 for prediction of response to chemotherapy and immunotherapy", *PLOS Computational
 Biology*", with some restructuring provided by Yasin Elmaci and Okon Samuel.
+ 
