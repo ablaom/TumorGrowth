@@ -8,7 +8,7 @@ Simple predictive models for tumor growth, and tools to apply them to clinical d
 [![Coverage](https://codecov.io/gh/JuliaAI/TumorGrowth.jl/branch/master/graph/badge.svg)](https://codecov.io/github/JuliaAI/TumorGrowth.jl?branch=master)
 [![Docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliaai.github.io/TumorGrowth.jl/dev/)
 
-# Acknowledgements
+### Acknowledgements
 
 The datasets provided the TumorGrowth.jl software are sourced from Laleh et
 al. [(2022)](https://doi.org/10.1371/journal.pcbi.1009822) "Classical mathematical models
