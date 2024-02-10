@@ -2,9 +2,7 @@
 
 Simple predictive models for tumor growth, and tools to apply them to clinical data
 
-```@raw html
 &#128679;
-```
 
 [![Build Status](https://github.com/JuliaAI/TumorGrowth.jl/workflows/CI/badge.svg)](https://github.com/JuliaAI/TumorGrowth.jl/actions)
 [![Coverage](https://codecov.io/gh/JuliaAI/TumorGrowth.jl/branch/master/graph/badge.svg)](https://codecov.io/github/JuliaAI/TumorGrowth.jl?branch=master)
