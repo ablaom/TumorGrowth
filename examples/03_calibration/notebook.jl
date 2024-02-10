@@ -125,12 +125,12 @@ solve!(
 plot(problem, label="bertalanffy, λ fixed")
 gui()
 
-# Let's try the 2D generalizaton of the TumorGrowth.model, still fixing `λ`:
+# Let's try the 2D generalization of the TumorGrowth.model, still fixing `λ`:
 
 problem = CalibrationProblem(
     times,
     volumes,
-    berta;
+    bertalanffy2;
     frozen = (; λ=1/5),
     learning_rate=0.001,
     half_life=21,
@@ -142,12 +142,12 @@ solve!(
     InvalidValue(),
     NumberLimit(6000),
 )
-plot!(problem, label="berta, λ fixed")
+plot!(problem, label="bertalanffy2, λ fixed")
 gui()
 
 #-
 
-# And finally, we'll try a neural ODE model, with fixed volume scale `v∞`.
+# And finally, we'll try a neural2 ODE model, with fixed volume scale `v∞`.
 
 using Lux, Random
 
@@ -158,7 +158,7 @@ network = Chain(
     Dense(5, 2),
 )
 rng = Xoshiro(123)
-model = neural(rng, network)
+model = neural2(rng, network)
 
 n = Lux.parameterlength(network)
 
@@ -185,7 +185,7 @@ solve!(
 plot!(
     problem,
     title = "Model comparison for a patient",
-    label = "neural",
+    label = "neural2",
     legend=:inside,
 )
 gui()

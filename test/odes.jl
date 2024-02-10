@@ -15,11 +15,11 @@ end
     @test TumorGrowth.bertalanffy_ode(v, p, t) ≈ -7log(5)*10
 end
 
-@testset "berta_ode!" begin
+@testset "bertalanffy2_ode!" begin
     p = [1/10, 0, 1/2]
     q = [5*ℯ, 5]
     dq = Vector{Float64}(undef, 2)
-    TumorGrowth.berta_ode!(dq, q, p, 42)
+    TumorGrowth.bertalanffy2_ode!(dq, q, p, 42)
     @test dq[2] ≈ 1/4
     @test dq[1] ≈ -ℯ/2
 end

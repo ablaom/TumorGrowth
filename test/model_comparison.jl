@@ -12,10 +12,10 @@ times = range(0.1, stop=47.0, length=5) .* (1 .+ .05*rand(rng, 5))
 volumes = gompertz(times, p) .* (1 .+ .05*rand(rng, 5))
 
 models = [logistic, bertalanffy]
-n_holdout = 2
+holdouts = 2
 options = TumorGrowth.options.(models)
 n_iters = TumorGrowth.n_iterations.(models)
-errs, ps = TumorGrowth.errors(times, volumes, models, n_holdout, options, n_iters)
+errs, ps = TumorGrowth.errors(times, volumes, models, holdouts, options, n_iters)
 
 # compute the `bertalanffy` error by hand:
 problem = CalibrationProblem(times[1:end-2], volumes[1:end-2], bertalanffy; options[2]...)
@@ -29,10 +29,10 @@ err = mean(abs.(v̂[end-1:end] - volumes[end-1:end]))
 @test errs[2] ≈ err
 
 # integration:
-comparison = compare(times, volumes, models; n_holdout)
+comparison = compare(times, volumes, models; holdouts)
 @test ComponentArray(parameters(comparison)[2]) ≈ ComponentArray(p)
 @test errors(comparison)[2] ≈ err
 
-# compare(times, volumes, models; n_holdout, plot=true)
+# compare(times, volumes, models; holdouts, plot=true)
 
 true

@@ -6,7 +6,7 @@ const ERR_UNRECOGNIZED_KEY = ArgumentError(
 )
 
 
-# # HEURISTICS TO GUESS INTITIAL PARAMETER VALUES AND THEIR SCALES
+# # HEURISTICS TO GUESS INITIAL PARAMETER VALUES AND THEIR SCALES
 
 const OneDimensionalModel =
         Union{typeof(bertalanffy),typeof(bertalanffy_numerical)}
@@ -29,7 +29,7 @@ function guess_parameters(times, volumes, ::ClassicalModel)
 end
 guess_parameters(times, volumes, ::OneDimensionalModel) =
         merge(guess_parameters(times, volumes, gompertz), (; λ=1/3))
-function guess_parameters(times, volumes, ::typeof(berta))
+function guess_parameters(times, volumes, ::typeof(bertalanffy2))
     κ = 0.5*sign(TumorGrowth.curvature(times, volumes))
     fallback =  merge(guess_parameters(times, volumes, bertalanffy), (; γ=κ))
 
@@ -50,7 +50,7 @@ function guess_parameters(times, volumes, ::typeof(berta))
     end
 
 end
-function guess_parameters(times, volumes, model::Neural)
+function guess_parameters(times, volumes, model::Neural2)
         v0 = first(volumes)
         v∞ = sum(volumes)/length(volumes)
         θ = initial_parameters(model)
@@ -70,14 +70,14 @@ function scale_function(times, volumes, model::OneDimensionalModel)
     time_scale = 1/abs(p.ω)
     return p -> (v0=volume_scale*p.v0, v∞=volume_scale*p.v∞, ω=p.ω/time_scale, λ=p.λ)
 end
-function scale_function(times, volumes, model::typeof(berta))
+function scale_function(times, volumes, model::typeof(bertalanffy2))
     p = guess_parameters(times, volumes, model)
     volume_scale = abs(p.v∞)
     time_scale = 1/abs(p.ω)
     p ->
         (v0=volume_scale*p.v0, v∞=volume_scale*p.v∞, ω=p.ω/time_scale, λ=p.λ, γ=p.γ)
 end
-function scale_function(times, volumes, model::Neural)
+function scale_function(times, volumes, model::Neural2)
         volume_scale = sum(volumes)/length(volumes)
         return p ->  (v0=volume_scale*p.v0, v∞=volume_scale*p.v∞, θ=p.θ)
 end
@@ -89,11 +89,11 @@ constraint_function(model) = _ -> true
 constraint_function(model::Union{
         ClassicalModel,
         OneDimensionalModel,
-        typeof(berta),
+        typeof(bertalanffy2),
 }) = p -> p.v0 > 0 && p.v∞ > 0
 
 
-# # PENATLY HELPER
+# # PENALTY HELPER
 
 @inline function factor(p, penalty)
     a, b = p.v0, p.v∞
@@ -127,7 +127,7 @@ end
 Specify a problem concerned with optimizing the parameters of a tumor growth `model`,
 given measured `volumes` and corresponding `times`.
 
-Here `model` can be one of: `bertalanffy`, `bertalanffy_numerical`, `berta`, `gompertz`,
+Here `model` can be one of: `bertalanffy`, `bertalanffy_numerical`, `bertalanffy2`, `gompertz`,
 `logistic`, `classical_bertalanffy`.
 
 Default optimisation is by Adam gradient descent, using a sum of squares loss. Call
@@ -200,15 +200,15 @@ A `model` can be any callable object returning volumes given times and parameter
 `predicted_volumes = model(times, p)`. TumorGrowth.jl supplies the following built-in
 models:
 
-| model                           | description                             | parameters, `p`       | analytic? | ODE                                   |
-|:--------------------------------|:----------------------------------------|:----------------------|:----------|:--------------------------------------|
-| [`bertalanffy`](@ref)           | generalized Bertalanffy (GB)            | `(; v0, v∞, ω, λ)`    | yes       | [`TumorGrowth.bertalanffy_ode`](@ref) |
-| [`bertalanffy_numerical`](@ref) | generalized Bertalanffy (testing only)  | `(; v0, v∞, ω, λ)`    | no        | [`TumorGrowth.bertalanffy_ode`](@ref) |
-| [`berta`](@ref)                 | 2D extension of generalized Bertalanffy | `(; v0, v∞, ω, λ, γ)` | no        | [`TumorGrowth.berta_ode!`](@ref)      |
-| [`gompertz`](@ref)              | Gompertz (GB, `λ=0`)                    | `(; v0, v∞, ω)`       | yes       | [`TumorGrowth.bertalanffy_ode`](@ref) |
-| [`logistic`](@ref)              | logistic/Verhulst (GB, `λ=-1`)          | `(; v0, v∞, ω)`       | yes       | [`TumorGrowth.bertalanffy_ode`](@ref) |
-| [`classical_bertalanffy`](@ref) | classical Bertalanffy (GB, `λ=1/3`)     | `(; v0, v∞, ω)`       | yes       | [`TumorGrowth.bertalanffy_ode`](@ref) |
-| [`neural(rng, network)`](@ref)  | neural ODE with Lux.jl `network`        | `(; v0, v∞, θ)`       | no        | [`TumorGrowth.nerual_ode`](@ref) |
+| model                           | description                             | parameters, `p`       | analytic? | ODE                                     |
+|:--------------------------------|:----------------------------------------|:----------------------|:----------|:----------------------------------------|
+| [`bertalanffy`](@ref)           | generalized Bertalanffy (GB)            | `(; v0, v∞, ω, λ)`    | yes       | [`TumorGrowth.bertalanffy_ode`](@ref)   |
+| [`bertalanffy_numerical`](@ref) | generalized Bertalanffy (testing only)  | `(; v0, v∞, ω, λ)`    | no        | [`TumorGrowth.bertalanffy_ode`](@ref)   |
+| [`bertalanffy2`](@ref)          | 2D extension of generalized Bertalanffy | `(; v0, v∞, ω, λ, γ)` | no        | [`TumorGrowth.bertalanffy2_ode!`](@ref) |
+| [`gompertz`](@ref)              | Gompertz (GB, `λ=0`)                    | `(; v0, v∞, ω)`       | yes       | [`TumorGrowth.bertalanffy_ode`](@ref)   |
+| [`logistic`](@ref)              | logistic/Verhulst (GB, `λ=-1`)          | `(; v0, v∞, ω)`       | yes       | [`TumorGrowth.bertalanffy_ode`](@ref)   |
+| [`classical_bertalanffy`](@ref) | classical Bertalanffy (GB, `λ=1/3`)     | `(; v0, v∞, ω)`       | yes       | [`TumorGrowth.bertalanffy_ode`](@ref)   |
+| [`neural2(rng, network)`](@ref) | neural2 ODE with Lux.jl `network`       | `(; v0, v∞, θ)`       | no        | [`TumorGrowth.neural_ode`](@ref)        |
 
 In every case `v0` is the initial volume (so that `predicted_volumes[1] == v0`). Note this
 can be different from `volumes[1]`.
@@ -246,7 +246,7 @@ can be different from `volumes[1]`.
 - `penalty=0.0` (range=``[0, ∞)``): the larger the positive value, the more a loss
   function modification discourages large differences in `v0` and `v∞` on a log
   scale. Helps discourage `v0` and `v∞` drifting out of bounds in models whose ODE have a
-  singularity at the origin (all built-in models except `neural`).
+  singularity at the origin (all built-in models except the neural network models).
 
 - `ode_options...`: optional keyword arguments for the ODE solver,
   `DifferentialEquations.solve`, from DifferentialEquations.jl. Not relevant for models

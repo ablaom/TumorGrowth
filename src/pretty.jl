@@ -14,8 +14,8 @@ function pretty(p::Union{
     return output
 end
 
-const NeuralParameter = NamedTuple{(:v0, :v∞, :θ)}
-function pretty(p::NeuralParameter)
+const Neural2Parameter = NamedTuple{(:v0, :v∞, :θ)}
+function pretty(p::Neural2Parameter)
     @unpack v0, v∞, θ = p
     Θ = ComponentArray(θ)
     μ = sum(Θ)/length(Θ)

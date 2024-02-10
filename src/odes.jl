@@ -14,7 +14,7 @@ given by
 
 `` dv/dt = ω((v∞/v)^λ - 1)/λ)v; v>0``
 
-where `[v∞, ω, λ] == p` are paramters::
+where `[v∞, ω, λ] == p` are parameters::
 
 -  ``v∞`` is the steady state solution, stable and unique, assuming ``ω > 0``
 - ``1/ω`` has the units of time
@@ -32,7 +32,7 @@ function bertalanffy_ode(v, p, t)
 end
 
 """
-    berta_ode!(dX, X, p, t)
+    bertalanffy2_ode!(dX, X, p, t)
 
 A two-dimensional extension of the generalized TumorGrowth.model for lesion growth (see
 [`bertalanffy_ode`](@ref)). Here `X = [v, u]`, where `v` is volume at time `t` and `u` is
@@ -58,7 +58,7 @@ model when also ``γ = 0``.
 Since `u` is a latent variable, its initial value is an additional model parameter.
 
 """
-function berta_ode!(dX, X, p, t)
+function bertalanffy2_ode!(dX, X, p, t)
     ω, λ, γ = p
     dX[2] = γ*ω*X[2]
     dX[1] = boxcox(λ, X[2]/X[1])*ω*X[1]
@@ -76,7 +76,7 @@ state(ode::NeuralODE) = ode.state
 """
    neural_ode([rng,] network)
 
-Initialize the Lux.jl neural network, `network`, and return an associated ODE, `ode`, with
+Initialize the Lux.jl neural2 network, `network`, and return an associated ODE, `ode`, with
 calling syntax `dX_dt = ode(X, p, t)`, where `p` is a `network`-compatible parameter.
 
 The initialized parameter value can be recovered with

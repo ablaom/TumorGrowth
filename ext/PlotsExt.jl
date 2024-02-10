@@ -10,13 +10,13 @@ linestyle(::Any) = :auto
 linestyle(::typeof(gompertz)) = :dashdot
 linestyle(::typeof(classical_bertalanffy)) = :dash
 linestyle(::typeof(bertalanffy)) = :solid
-linestyle(::typeof(berta)) = :dashdotdot
+linestyle(::typeof(bertalanffy2)) = :dashdotdot
 linestyle(::typeof(logistic)) = :dot
 linecolor(::Any) = :auto
 linecolor(::typeof(gompertz)) = :black
 linecolor(::typeof(classical_bertalanffy)) = :black
 linecolor(::typeof(bertalanffy)) = :black
-linecolor(::typeof(berta)) = :black
+linecolor(::typeof(bertalanffy2)) = :black
 linecolor(::typeof(logistic)) = :black
 
 @recipe function f(c::TumorGrowth.CurveOptimisationProblem)
@@ -40,7 +40,7 @@ end
         yplot = model(xplot, p)
         xplot, yplot
     end
-    if model == berta
+    if model == bertalanffy2
         @series begin
             label := "$model (aspirational)"
             seriestype := :path
@@ -63,7 +63,7 @@ end
     etimes = comparison.times
     evolumes = comparison.volumes
     models = comparison.models
-    n_holdout = comparison.n_holdout
+    holdouts = comparison.holdouts
     parameters = TumorGrowth.parameters(comparison)
     errors = TumorGrowth.errors(comparison)
 
@@ -76,7 +76,7 @@ end
         markershape --> :diamond
         color := :black
         label := :none
-        etimes[1:end-n_holdout], evolumes[1:end-n_holdout]
+        etimes[1:end-holdouts], evolumes[1:end-holdouts]
     end
 
     @series begin
@@ -84,7 +84,7 @@ end
         markershape --> :diamond
         color := :white
         label := "holdout"
-        etimes[end-n_holdout+1:end], evolumes[end-n_holdout+1:end]
+        etimes[end-holdouts+1:end], evolumes[end-holdouts+1:end]
     end
     for (i, model) in enumerate(models)
         @series begin
