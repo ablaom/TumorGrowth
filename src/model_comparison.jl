@@ -163,7 +163,7 @@ function errors(etimes, evolumes, models, holdouts, options, n_iterations; plot=
         problem = CalibrationProblem(times, volumes, model; options[i]...)
         controls = Any[Step(1), InvalidValue(), NumberLimit(n_iter)]
         plot && push!(controls, IterationControl.skip(
-            Callback(pr-> (Plots.plot(pr); gui())),
+            Callback(pr-> (TumorGrowth.plot(pr); TumorGrowth.gui())),
             predicate=div(n_iter, 50),
         ))
         outcomes = solve!(problem, controls...)
@@ -186,4 +186,3 @@ function Base.show(io::IO, comparison::ModelComparison)
     end
     return nothing
 end
-

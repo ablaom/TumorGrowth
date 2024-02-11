@@ -2,6 +2,7 @@ using Test
 using TumorGrowth
 using IterationControl
 import StableRNGs.StableRNG
+using Plots
 
 @testset "OptimisationProblem" begin
     f(x) = (x.a[1] - π)^2
@@ -89,6 +90,10 @@ end
     )
     # test that threshold caused the stop:
     @test outcomes[3][2].done
+
+    # smoke test:
+    plot(problem)
+
     p = solution(problem)
     deviations = F(xs, p) - F(xs, p_true)
     @test sum(x->x^2, deviations) < threshold

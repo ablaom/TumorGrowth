@@ -22,8 +22,11 @@ p = (v0=0.0002261, v∞=2.792e-5,  ω=0.05731) # `v0` is the initial volume
 gompertz(times, p)
 ```
 
-The underlying ODEs are solved under the hood, if an analytic solution is not known.
+The underlying ODEs are solved using
+[DifferentialEquations.jl](https://docs.sciml.ai/DiffEqDocs/stable/), unless an analytic
+solution is known. Keyword options from `DifferentialEquations.solve` may be passed to a
+model call.
 
 TumorGrowth.jl also provides a [`CalibrationProblem`](@ref) tool to calibrate model
-parameters, given a history of measurements, and a [`compare`](@ref) tool to compare models
-on a holdout set.
+parameters, given a history of measurements, and a [`compare`](@ref) tool to compare
+models on a holdout set. See [Getting started](@ref) for details.

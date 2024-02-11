@@ -6,9 +6,9 @@ test_names = [
     "patient_data",
     "odes",
     "solutions",
+    "model_comparison", # this must run before "optimisers" and "calibration"
     "optimisers",
     "calibration",
-    "model_comparison",
 ]
 
 names = isempty(ARGS) ? test_names : ARGS
