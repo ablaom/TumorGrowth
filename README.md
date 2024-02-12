@@ -6,7 +6,7 @@ Simple predictive models for tumor growth, and tools to apply them to clinical d
 
 [![Build Status](https://github.com/ablaom/TumorGrowth.jl/workflows/CI/badge.svg)](https://github.com/ablaom/TumorGrowth.jl/actions)
 [![Coverage](https://codecov.io/gh/ablaom/TumorGrowth.jl/branch/master/graph/badge.svg)](https://codecov.io/github/ablaom/TumorGrowth.jl?branch=master)
-[![Docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliaai.github.io/TumorGrowth.jl/dev/)
+[![Docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://ablaom.github.io/TumorGrowth.jl/dev/)
 
 ### Acknowledgements
 

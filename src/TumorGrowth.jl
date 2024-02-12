@@ -13,6 +13,7 @@ using UnPack
 using ComponentArrays
 using Statistics
 
+include("plots.jl")
 include("patient_data.jl")
 include("tools.jl")
 include("functor.jl")

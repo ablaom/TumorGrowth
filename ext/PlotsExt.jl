@@ -98,4 +98,10 @@ end
     end
 end
 
+
+# # Interface
+
+TumorGrowth.plot(problem::CalibrationProblem; kwargs...) = plot(problem; kwargs...)
+TumorGrowth.gui() = gui()
+
 end # module

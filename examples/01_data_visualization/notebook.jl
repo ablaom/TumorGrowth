@@ -4,39 +4,41 @@ dir = @__DIR__
 Pkg.activate(dir)
 Pkg.instantiate()
 
-import TumorGrowth.patient_data
-import DataFrames
+using TumorGrowth
 using Plots
+linestyles = [:solid :dash :dot :dashdot :dashdotdot]
+
 
 # # DATA INGESTION
 
-# From the data file, extract a vector of patient records of the form `(id=..., times=...,
-# volumes=...)`, one for each patient:
-df = patient_data() |> DataFrames.DataFrame
-gdf = collect(DataFrames.groupby(df, :Pt_hashID));
-patient_records = map(gdf) do sub_df
-    (
-    id = sub_df[1,:Pt_hashID],
-    times = sub_df.T_weeks,
-    volumes = sub_df.Lesion_normvol,
-    )
-end;
+# Load the Laleh et al (2022) data set as a row table (vector of named tuples):
 
-# Get the records which have a least 6 measurements:
-patient_records6 = filter(patient_records) do s
-    length(s.times) >= 6
+records = patient_data();
+
+# Inspect the field names:
+
+keys(first(records))
+
+# Get the records which have a least 6 measurements and have "fluctuating" type:
+
+records6 = filter(records) do record
+    record.readings >= 6 && record.response == "flux"
 end;
 
 # Plot some of these records:
+
 plt = plot(xlab="time", ylab="volume (rescaled by maximum)")
-selected_indices = [1, 5, 6, 10, 14, 16]
-for (i, record) in enumerate(patient_records6[selected_indices])
-    times = record.times
-    ts = range(times[1], length=40, stop=times[end]) |> collect;
-    max = maximum(record.volumes)
-    id = record.id[1:4]
-    plot!(record.times, (record.volumes) ./ max, label="$id")
-    gui()
+for (i, record) in enumerate(records6[1:5])
+    times = record.T_weeks
+    volumes = record.Lesion_normvol
+    id = string(record.Pt_hashID[1:4], "…")
+    max = maximum(volumes)
+    plot!(times, volumes/max, label=id, linestyle=linestyles[i], linecolor=:black)
 end
-savefig(joinpath(dir, "selected_patient_data.png"))
+plot!(xlab="time", ylab="volume", title = "Example of fluctuating responses")
 gui()
+
+#-
+
+savefig(joinpath(dir, "fluctuating_patient_data.png"))
+

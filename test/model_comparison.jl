@@ -33,6 +33,13 @@ comparison = compare(times, volumes, models; holdouts)
 @test ComponentArray(parameters(comparison)[2]) ≈ ComponentArray(p)
 @test errors(comparison)[2] ≈ err
 
-# compare(times, volumes, models; holdouts, plot=true)
+# smoke tests for plots:
+@test_throws(
+    TumorGrowth.ERR_PLOTS_UNLOADED,
+    compare(times, volumes, models; holdouts, plot=true),
+)
+using Plots
+comparison = compare(times, volumes, models; holdouts, plot=true)
+plot(comparison)
 
 true
