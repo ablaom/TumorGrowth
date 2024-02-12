@@ -6,6 +6,8 @@ Pkg.instantiate()
 
 using TumorGrowth
 using Plots
+linestyles = [:solid :dash :dot :dashdot :dashdotdot]
+
 
 # # DATA INGESTION
 
@@ -15,7 +17,7 @@ records = patient_data();
 
 # Inspect the field names:
 
-keys(first(record))
+keys(first(records))
 
 # Get the records which have a least 6 measurements and have "fluctuating" type:
 
@@ -26,16 +28,17 @@ end;
 # Plot some of these records:
 
 plt = plot(xlab="time", ylab="volume (rescaled by maximum)")
-for record in records6[1:5]
+for (i, record) in enumerate(records6[1:5])
     times = record.T_weeks
     volumes = record.Lesion_normvol
     id = string(record.Pt_hashID[1:4], "…")
     max = maximum(volumes)
-    plot!(times, volumes/max, label=id)
+    plot!(times, volumes/max, label=id, linestyle=linestyles[i], linecolor=:black)
 end
+plot!(xlab="time", ylab="volume", title = "Example of fluctuating responses")
 gui()
 
 #-
 
-savefig(joinpath(dir, "selected_patient_data.png"))
+savefig(joinpath(dir, "fluctuating_patient_data.png"))
 
