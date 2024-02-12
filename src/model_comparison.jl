@@ -122,8 +122,8 @@ plot(comparison, title="A comparison of two models")
 - `n_iterations=TumorGrowth.n_iterations.(models)`: a vector of iteration counts for the
   calibration of `models`
 
-- `options=TumorGrowth.options.(models)`: a vector of named tuples providing the keyword
-  arguments for `CalibrationProblem`s - one for each model. See
+- `calibration_options=TumorGrowth.options.(models)`: a vector of named tuples providing
+  the keyword arguments for `CalibrationProblem`s - one for each model. See
   [`CalibrationProblem`](@ref) for details.
 
 

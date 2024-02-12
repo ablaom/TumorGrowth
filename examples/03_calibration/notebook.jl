@@ -3,11 +3,10 @@ dir = @__DIR__
 Pkg.activate(dir)
 Pkg.instantiate()
 
+using TumorGrowth
 using Statistics
-import DataFrames
 using Plots
 using IterationControl
-using TumorGrowth
 
 Plots.scalefontsizes() # reset font sizes
 Plots.scalefontsizes(0.85)
@@ -15,21 +14,11 @@ Plots.scalefontsizes(0.85)
 
 # # DATA INGESTION
 
-# From the data file, extract a vector of patient records of the form `(id=..., times=...,
-# volumes=...)`, one for each patient:
-df = patient_data() |> DataFrames.DataFrame;
-gdf = collect(DataFrames.groupby(df, :Pt_hashID));
-records = map(gdf) do sub_df
-    (
-    id = sub_df[1,:Pt_hashID],
-    times = sub_df.T_weeks,
-    volumes = sub_df.Lesion_normvol,
-    )
-end;
-
 # Get the records which have a least 6 measurements:
-records6 = filter(records) do s
-    length(s.times) >= 6
+
+records = patient_data();
+records6 = filter(records) do record
+    record.readings >= 6
 end;
 
 
@@ -51,8 +40,8 @@ gui()
 
 #-
 
-times = record.times
-volumes = record.volumes;
+times = record.T_weeks
+volumes = record.Lesion_normvol;
 
 # We'll try calibrating the generalized Bertalanffy model, `bertalanffy`, with fixed
 # parameter `λ=1/5`:
@@ -87,7 +76,7 @@ bertalanffy(extended_times, p)
 
 #-
 
-plot(problem, title="bertalanffy, λ=1/5 fixed")
+plot(problem, title="bertalanffy, λ=1/5 fixed", color=:black)
 gui()
 
 #-
@@ -102,8 +91,8 @@ savefig(joinpath(dir, "patientA.png"))
 record = records6[10]
 gui()
 
-times = record.times
-volumes = record.volumes
+times = record.T_weeks
+volumes = record.Lesion_normvol;
 
 # We'll first try the earlier simple model:
 
@@ -147,11 +136,11 @@ gui()
 
 #-
 
-# And finally, we'll try a neural2 ODE model, with fixed volume scale `v∞`.
+# And finally, we'll try a 2D neural ODE model, with fixed volume scale `v∞`.
 
 using Lux, Random
 
-# Note well the zero-initialization of weights in first layer:
+# *Note well* the zero-initialization of weights in first layer:
 
 network = Chain(
     Dense(2, 5, Lux.tanh, init_weight=Lux.zeros64),
@@ -170,7 +159,6 @@ problem = CalibrationProblem(
     times,
     volumes,
     model;
-    scale=identity,
     frozen = (; v∞),
     learning_rate=0.001,
     half_life=21,
@@ -193,3 +181,23 @@ gui()
 #-
 
 savefig(joinpath(dir, "patientB.png"))
+
+# For a more principled comparison, we compare the models on a holdout set:
+
+models = [bertalanffy, bertalanffy2, model]
+calibration_options = [
+(frozen = (; λ=1/5), learning_rate=0.001, half_life=21), # bertalanffy
+(frozen = (; λ=1/5), learning_rate=0.001, half_life=21), # bertalanffy2
+(frozen = (; v∞), learning_rate=0.001, half_life=21), # neural2
+]
+n_iterations = [6000, 6000, 6000]
+comparison = compare(times, volumes, models; calibration_options, n_iterations)
+
+#-
+
+plot(comparison)
+gui()
+
+#-
+
+savefig(joinpath(dir, "patientB_validation.png"))
