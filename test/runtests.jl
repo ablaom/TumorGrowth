@@ -9,6 +9,7 @@ test_names = [
     "model_comparison", # this must run before "optimisers" and "calibration"
     "optimisers",
     "calibration",
+    "integration",
 ]
 
 names = isempty(ARGS) ? test_names : ARGS
