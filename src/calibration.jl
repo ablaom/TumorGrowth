@@ -91,7 +91,7 @@ constraint_function(model::Union{
     ClassicalModel,
     BertalanffyModel,
     NeuralModel,
-    typeof(Bertalanffy2),
+    typeof(bertalanffy2),
 }) = p -> p.v0 > 0 && p.v∞ > 0
 
 
