@@ -8,10 +8,11 @@ const ERR_UNRECOGNIZED_KEY = ArgumentError(
 
 # # HEURISTICS TO GUESS INITIAL PARAMETER VALUES AND THEIR SCALES
 
-const OneDimensionalModel =
+const BertalanffyModel =
         Union{typeof(bertalanffy),typeof(bertalanffy_numerical)}
 const ClassicalModel =
-        Union{typeof(gompertz),typeof(logistic),typeof(classical_bertalanffy)}
+    Union{typeof(gompertz),typeof(logistic),typeof(classical_bertalanffy)}
+const NeuralModel = Union{Neural,Neural2}
 
 guess_parameters(times, volumes, model) = nothing
 function guess_parameters(times, volumes, ::ClassicalModel)
@@ -27,7 +28,7 @@ function guess_parameters(times, volumes, ::ClassicalModel)
     ω = (log(v2) - log(v1))/(τ2 - τ1)
     return (; v0, v∞, ω)
 end
-guess_parameters(times, volumes, ::OneDimensionalModel) =
+guess_parameters(times, volumes, ::BertalanffyModel) =
         merge(guess_parameters(times, volumes, gompertz), (; λ=1/3))
 function guess_parameters(times, volumes, ::typeof(bertalanffy2))
     κ = 0.5*sign(TumorGrowth.curvature(times, volumes))
@@ -50,7 +51,7 @@ function guess_parameters(times, volumes, ::typeof(bertalanffy2))
     end
 
 end
-function guess_parameters(times, volumes, model::Neural2)
+function guess_parameters(times, volumes, model::NeuralModel)
         v0 = first(volumes)
         v∞ = sum(volumes)/length(volumes)
         θ = initial_parameters(model)
@@ -64,7 +65,7 @@ function scale_function(times, volumes, model::ClassicalModel)
     time_scale = 1/abs(p.ω)
     return p -> (v0=volume_scale*p.v0, v∞=volume_scale*p.v∞, ω=p.ω/time_scale)
 end
-function scale_function(times, volumes, model::OneDimensionalModel)
+function scale_function(times, volumes, model::BertalanffyModel)
     p = guess_parameters(times, volumes, model)
     volume_scale = abs(p.v∞)
     time_scale = 1/abs(p.ω)
@@ -77,7 +78,7 @@ function scale_function(times, volumes, model::typeof(bertalanffy2))
     p ->
         (v0=volume_scale*p.v0, v∞=volume_scale*p.v∞, ω=p.ω/time_scale, λ=p.λ, γ=p.γ)
 end
-function scale_function(times, volumes, model::Neural2)
+function scale_function(times, volumes, model::NeuralModel)
         volume_scale = sum(volumes)/length(volumes)
         return p ->  (v0=volume_scale*p.v0, v∞=volume_scale*p.v∞, θ=p.θ)
 end
@@ -88,8 +89,8 @@ end
 constraint_function(model) = _ -> true
 constraint_function(model::Union{
         ClassicalModel,
-        OneDimensionalModel,
-        typeof(bertalanffy2),
+        BertalanffyModel,
+        NeuralModel,
 }) = p -> p.v0 > 0 && p.v∞ > 0
 
 

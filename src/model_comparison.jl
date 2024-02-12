@@ -9,12 +9,12 @@ const ERR_MISMATCH = DimensionMismatch(
 
 options(model) =
     (; learning_rate=0.0001, penalty=0.8)
-options(model::TumorGrowth.Neural2) =
+options(model::Union{Neural,Neural2}) =
     (; learning_rate=0.01, frozen=(; v∞=nothing))
 
 n_iterations(model) = 10000
 n_iterations(::typeof(bertalanffy2)) = 20000
-n_iterations(::TumorGrowth.Neural2) = 1500
+n_iterations(::Union{Neural,Neural2}) = 1500
 
 mae(ŷ, y) = abs.(ŷ .- y) |> mean
 

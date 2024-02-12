@@ -29,4 +29,4 @@ model call.
 
 TumorGrowth.jl also provides a [`CalibrationProblem`](@ref) tool to calibrate model
 parameters, given a history of measurements, and a [`compare`](@ref) tool to compare
-models on a holdout set. See [Getting started](@ref) for details.
+models on a holdout set. See [Quick start](@ref) for details.

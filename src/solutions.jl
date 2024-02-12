@@ -1,13 +1,3 @@
-# # HELPERS
-
-bertalanffy_analytic_solution(t, v0, v∞, ω, λ) =
-    λ == 0 ?
-    (v0/v∞)^exp(-ω*t)*v∞ :
-    (1 + ((v0/v∞)^λ - 1)*exp(-ω*t))^(1/λ)*v∞
-
-
-# # FUNCTIONS RETURNING SOLUTIONS TO THE ODES
-
 # A *solution* maps times, an initial condition `v0` and ODE parameters to volumes.
 
 function DOC_PARAMS(k, ode)
@@ -17,6 +7,20 @@ function DOC_PARAMS(k, ode)
     "volume at time `times[1]` and the other parameters are explained in "*
     "the [`TumorGrowth.$ode`](@ref) document string"
 end
+
+
+# # HELPERS
+
+bertalanffy_analytic_solution(t, v0, v∞, ω, λ) =
+    λ == 0 ?
+    (v0/v∞)^exp(-ω*t)*v∞ :
+    (1 + ((v0/v∞)^λ - 1)*exp(-ω*t))^(1/λ)*v∞
+
+# relu(x::T) where T<:Number = x < 0 ? zero(T) : x
+relu(x) = x
+
+
+# # CLASSICAL MODELS
 
 """
     bertalanffy(times, p)
@@ -75,58 +79,6 @@ function bertalanffy_numerical(
     return v∞ .* solution.u
 end
 
-"""
-    bertalanffy2(times, p; aspirational=false, solve_kwargs...)
-
-Return volumes for specified `times`, based on numerical solutions to a two-dimensional
-extension of generalized Bertalanffy model for lesion growth. Here $(DOC_PARAMS(5,
-:bertalanffy2_ode!)).
-
-The usual generalized Bertalanffy model is recovered when `γ=0`. In that case, using
-[`bertalanffy`](@ref), which is based on an analytic solution, may be preferred.
-
-!!! important
-
-    It is assumed without checking that `times` is ordered: `times == sort(times)`.
-
-# Keyword options
-
-- `aspirational=false`: Set to `true` to return the aspirational volumes, in addition to
-  the actual volumes.
-
-- `solve_kwargs`: optional keyword arguments for the ODE solver,
-  `DifferentialEquations.solve`, from DifferentialEquations.jl.
-
-See also [`bertalanffy`](@ref).
-
-"""
-function bertalanffy2(
-    times,
-    p;
-    aspirational=false,
-    saveat = times,
-    reltol = 1e-7, # this default determined by experiments with patient with id
-                 # "44f2f0cc8accfe91e86f0df74346a9d4-S3"; don't raise it without further
-                 # investigation.
-    sensealg = Sens.InterpolatingAdjoint(; autojacvec = Sens.ZygoteVJP()),
-    kwargs..., # other DE.solve kwargs, eg, `reltol`, `abstol`
-    )
-
-    @unpack v0, v∞, ω, λ, γ = p
-
-    # We rescale volumes by `v∞` before sending to solver. It is tempting to perform a
-    # time-rescaling, but an issue prevents this:
-    # https://discourse.julialang.org/t/time-normalisation-results-in-nothing-gradients-of-ode-solutions/109353
-    tspan = (times[1], times[end])
-    q0 = [v0/v∞, 1.0]
-    p = [ω, λ, γ]
-    problem = DE.ODEProblem(bertalanffy2_ode!, q0, tspan, p)
-    solution = DE.solve(problem, DE.Tsit5(); saveat, reltol, sensealg, kwargs...)
-    # return to original scale:
-    aspirational || return v∞ .* first.(solution.u)
-    return v∞ .* solution.u
-end
-
 _merge(x, y) = merge(x, y)
 function _merge(x::ComponentArray, y)
     p, reconstruct = TumorGrowth.functor(x)
@@ -173,6 +125,65 @@ See also [`bertalanffy`](@ref), [`bertalanffy2`](@ref).
 """
 classical_bertalanffy(times, p) = bertalanffy(times, _merge(p, (; λ=1/3)))
 
+
+# # 2D BERTALANFFY
+
+"""
+    bertalanffy2(times, p; aspirational=false, solve_kwargs...)
+
+Return volumes for specified `times`, based on numerical solutions to a two-dimensional
+extension of generalized Bertalanffy model for lesion growth. Here $(DOC_PARAMS(5,
+:bertalanffy2_ode!)).
+
+The usual generalized Bertalanffy model is recovered when `γ=0`. In that case, using
+[`bertalanffy`](@ref), which is based on an analytic solution, may be preferred.
+
+!!! important
+
+    It is assumed without checking that `times` is ordered: `times == sort(times)`.
+
+# Keyword options
+
+- `aspirational=false`: Set to `true` to return the aspirational volumes, in addition to
+  the actual volumes.
+
+- `solve_kwargs`: optional keyword arguments for the ODE solver,
+  `DifferentialEquations.solve`, from DifferentialEquations.jl.
+
+See also [`bertalanffy`](@ref).
+
+"""
+function bertalanffy2(
+    times,
+    p;
+    aspirational=false,
+    saveat = times,
+    reltol = 1e-7, # this default determined by experiments with patient with id
+                   # "44f2f0cc8accfe91e86f0df74346a9d4-S3"; don't raise it without further
+                   # investigation.
+    sensealg = Sens.InterpolatingAdjoint(; autojacvec = Sens.ZygoteVJP()),
+    kwargs..., # other DE.solve kwargs, eg, `reltol`, `abstol`
+    )
+
+    @unpack v0, v∞, ω, λ, γ = p
+
+    # We rescale volumes by `v∞` before sending to solver. It is tempting to perform a
+    # time-rescaling, but an issue prevents this:
+    # https://discourse.julialang.org/t/time-normalisation-results-in-nothing-gradients-of-ode-solutions/109353
+    tspan = (times[1], times[end])
+    q0 = [v0/v∞, 1.0]
+    p = [ω, λ, γ]
+    problem = DE.ODEProblem(bertalanffy2_ode!, q0, tspan, p)
+    solution = DE.solve(problem, DE.Tsit5(); saveat, reltol, sensealg, kwargs...)
+    # return to original scale:
+    # aspirational || return v∞ .* first.(solution.u)
+    # return v∞ .* solution.u
+    return v∞ .* first.(solution.u)
+end
+
+
+# # 2D NEURAL
+
 mutable struct Neural2{O}
     ode::O
 end
@@ -180,9 +191,9 @@ end
 """
     neural2([rng,] network)
 
-Initialize the Lux.jl neural2 network, `network`, and return a callable object, `model`,
-for solving the associated neural2 ODE for volume growth, as detailed under "The ODE"
-below.
+Initialize the Lux.jl neural network, `network`, and return a callable object, `model`,
+for solving the associated two-dimensional neural2 ODE for volume growth, as detailed
+under "The ODE" below.
 
 !!! important
 
@@ -195,7 +206,7 @@ The returned object `model` is called like this:
     volumes = model(times, p)
 
 where `p` should have properties `v0`, `v∞`, `θ`, where `v0` is the initial volume (so
-that `first(volumes) = v0`), `v∞` is a volume scale parameter, and `θ` is a
+that `volumes[1] = v0`), `v∞` is a volume scale parameter, and `θ` is a
 `network`-compatible Lux.jl parameter.
 
 The form of `θ` is the same as `TumorGrowth.initial_parameters(model)`, which is also the
@@ -204,7 +215,7 @@ default initial value used when solving an associated [`CalibrationProblem`](@re
 ```julia
 using Lux, Random
 
-# define neural2 network with 2 inputs and 2 outputs:
+# define neural network with 2 inputs and 2 outputs:
 network = Lux.Chain(Dense(2, 3, Lux.tanh; init_weight=Lux.zeros64), Dense(3, 2))
 
 rng = Xoshiro(123)
@@ -228,7 +239,7 @@ julia> volumes = model(times, p) # (constant because of zero-initialization)
 
 ...
 
-See also [`TumorGrowth.neural_ode`](@ref).
+See also [`neural`](@ref), [`TumorGrowth.neural_ode`](@ref).
 
 """
 neural2(args...) = Neural2(neural_ode(args...))
@@ -246,8 +257,6 @@ function Base.show(io::IO, model::Neural2)
     n = Lux.parameterlength(model.ode.θ0)
     print(io, "neural2 ($(n + 2) params)")
 end
-
-relu(x::T) where T<:Number = x < 0 ? zero(T) : x
 
 function (model::Neural2)(
     times,
@@ -272,3 +281,102 @@ function (model::Neural2)(
     return v∞*relu.(first.(solution.u))
 end
 (model::Neural2)(times, p; kwargs...) = model(times, p.v0, p.v∞, p.θ; kwargs...)
+
+
+# # 1D NEURAL
+
+mutable struct Neural{O}
+    ode::O
+end
+
+"""
+    neural([rng,] network)
+
+Initialize the Lux.jl neural network, `network`, and return a callable object, `model`,
+for solving the associated one-dimensional neural ODE for volume growth, as detailed under
+"The ODE" below.
+
+!!! important
+
+    Here `network` must accept *one* input and deliver *one* output. For purposes of
+    calibration, it may be helpful to use zero-initialization for the first layer. See the
+    example below.
+
+The returned object, `model`, is called like this:
+
+    volumes = model(times, p)
+
+where `p` should have properties `v0`, `v∞`, `θ`, where `v0` is the initial volume (so
+that `volumes[1] = v0`), `v∞` is a volume scale parameter, and `θ` is a
+`network`-compatible Lux.jl parameter.
+
+The form of `θ` is the same as `TumorGrowth.initial_parameters(model)`, which is also the
+default initial value used when solving an associated [`CalibrationProblem`](@ref).
+
+```julia
+using Lux, Random
+
+# define neural network with 1 input and 1 output:
+network = Lux.Chain(Dense(1, 3, Lux.tanh; init_weight=Lux.zeros64), Dense(3, 1))
+
+rng = Xoshiro(123)
+model = neural(rng, network)
+θ = TumorGrowth.initial_parameters(model)
+times = [0.1, 6.0, 16.0, 24.0, 32.0, 39.0]
+v0, v∞ = 0.00023, 0.00015
+p = (; v0, v∞, θ)
+
+julia> volumes = model(times, p) # (constant because of zero-initialization)
+6-element Vector{Float64}:
+ 0.00023
+ 0.00023
+ 0.00023
+ 0.00023# # Neural2
+```
+
+# The ODE
+
+...
+
+See also [`neural2`](@ref), [`TumorGrowth.neural_ode`](@ref).
+
+"""
+neural(args...) = Neural(neural_ode(args...))
+initial_parameters(model::Neural) = initial_parameters(model.ode)
+state(model::Neural) = state(model.ode)
+
+function Base.show(io::IO, ::MIME"text/plain", model::Neural)
+    n = Lux.parameterlength(model.ode.θ0)
+    print(
+        io,
+        "Neural model, (times, v0, v∞, θ) -> volumes, where length(θ) = $n",
+    )
+end
+function Base.show(io::IO, model::Neural)
+    n = Lux.parameterlength(model.ode.θ0)
+    print(io, "neural ($(n + 2) params)")
+end
+
+function (model::Neural)(
+    times,
+    v0,
+    v∞,
+    θ;
+    saveat = times,
+    sensealg = Sens.InterpolatingAdjoint(; autojacvec = Sens.ZygoteVJP()),
+    kwargs..., # other `DifferentialEquations.solve` kwargs, eg, `reltol`, `abstol`
+    )
+    ode = model.ode
+    tspan = (times[1], times[end])
+    X0=[v0/v∞,]
+    problem = DE.ODEProblem(ode, X0, tspan, θ)
+    solution = DE.solve(
+        problem,
+        DE.Tsit5();
+        saveat,
+        sensealg,
+    )
+    # return to original scale:
+    return v∞*relu.(first.(solution.u))
+end
+(model::Neural)(times, p; kwargs...) = model(times, p.v0, p.v∞, p.θ; kwargs...)

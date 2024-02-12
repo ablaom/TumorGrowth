@@ -8,8 +8,8 @@ Biology*":
 ```@example overview
 using TumorGrowth
 
-data = patient_data();
-record = data[16]   # storing all measurements for one lesion
+records = patient_data();
+record = records[16]   # storing all measurements for one lesion
 keys(record)
 ```
 
