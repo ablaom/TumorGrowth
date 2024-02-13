@@ -111,8 +111,7 @@ plot!(problem, label="prediction")
 
 # Keyword options
 
-- `p0`: initial value of the model parameters (always a vector); inferred by default for
-  built-in models
+- `p0`: initial value of the model parameters; inferred by default for built-in models
 
 - `g=(p-> true)`: constraint function: If `g(p) == false` for some parameter `p`, then a
   warning is given and `solution(problem)` is frozen at the last constrained value of `p`;
@@ -130,11 +129,10 @@ plot!(problem, label="prediction")
 - `optimiser=Optimisers.Adam(learning_rate)`: optimiser; must be from Optimisers.jl.
 
 - `scale`: a scaling function with the property that `p = scale(q)` has a value of the
-  same order of magnitude for the problem parameters being optimised, whenever `q` has the
-  same form as `p` but with all values equal to one. Scaling ensures gradient descent
-  learns all components of `p` at a similar rate. If unspecified, scaling is inferred for
-  built-in models, and uniform otherwise.
-
+  same order of magnitude for the model parameters being optimised, whenever `q` has the
+  same form as a model parameter `p` but with all values equal to one. Scaling ensures
+  gradient descent learns all components of `p` at a similar rate. If unspecified, scaling
+  is inferred for built-in models, and uniform otherwise.
 
 - `half_life=Inf`: set to a real positive number to replace the sum of squares loss with a
   weighted version; weights decay in reverse time with the specified `half_life`
@@ -142,11 +140,11 @@ plot!(problem, label="prediction")
 - `penalty=0.0` (range=``[0, ∞)``): the larger the positive value, the more a loss
   function modification discourages large differences in `v0` and `v∞` on a log
   scale. Helps discourage `v0` and `v∞` drifting out of bounds in models whose ODE have a
-  singularity at the origin (all built-in models except the neural network models).
+  singularity at the origin.
 
 - `ode_options...`: optional keyword arguments for the ODE solver,
   `DifferentialEquations.solve`, from DifferentialEquations.jl. Not relevant for models
-  using analytic solutions (see table above).
+  using analytic solutions (see the table at [`TumorGrowth`](@ref).y
 
 """
 function CalibrationProblem(
