@@ -28,6 +28,7 @@ struct ModelComparison{T<:Real, MTuple<:Tuple, OTuple<:Tuple, N, M, PTuple<:Tupl
         n_iterations = n_iterations.(models),
         metric=mae,
         plot=false,
+        flag_out_of_bounds=false,
         ) where T<:Real
 
         length(models) == length(calibration_options) == length(n_iterations) ||
@@ -41,8 +42,9 @@ struct ModelComparison{T<:Real, MTuple<:Tuple, OTuple<:Tuple, N, M, PTuple<:Tupl
                 _models,
                 holdouts,
                 _options,
-                n_iterations;
+                n_iterations,
                 plot,
+                flag_out_of_bounds,
             ) # defined below
         MTuple = typeof(_models)
         OTuple = typeof(_options)
@@ -94,6 +96,9 @@ julia> gompertz(times, p)
  3.922743006690166e-5
 ```
 
+When a model parameter becomes out of bounds, calibration stops early and the last
+in-bounds value is reported.
+
 # Visualing comparisons
 
 ```julia
@@ -117,6 +122,9 @@ plot(comparison, title="A comparison of two models")
   the keyword arguments for `CalibrationProblem`s - one for each model. See
   [`CalibrationProblem`](@ref) for details.
 
+- `flag_out_of_bounds=false`: set to `true` to report `NaN` as the error for a model whose
+  parameter became out of bounds during calibration. Otherwise, the error for the last
+  in-bounds parameter is reported.
 
 See also [`errors`](@ref), [`parameters`](@ref).
 
@@ -142,7 +150,16 @@ calls to [`compare`](@ref).
 parameters(comparison::ModelComparison) = comparison.parameters
 
 
-function errors(etimes, evolumes, models, holdouts, options, n_iterations; plot=false)
+function errors(
+    etimes,
+    evolumes,
+    models,
+    holdouts,
+    options,
+    n_iterations,
+    plot,
+    flag_out_of_bounds,
+    )
 
     times = etimes[1:end-holdouts]
     volumes = evolumes[1:end-holdouts]
@@ -158,9 +175,14 @@ function errors(etimes, evolumes, models, holdouts, options, n_iterations; plot=
             predicate=div(n_iter, 50),
         ))
         outcomes = solve!(problem, controls...)
+        out_of_bounds = outcomes[2][2].done
         p = solution(problem)
-        v̂ = model(etimes, p)
-        error = mae(v̂[end-holdouts+1:end], evolumes[end-holdouts+1:end])
+        if out_of_bounds && flag_out_of_bounds
+            error = NaN
+        else
+            v̂ = model(etimes, p)
+            error = mae(v̂[end-holdouts+1:end], evolumes[end-holdouts+1:end])
+        end
         (error, p)
     end
 

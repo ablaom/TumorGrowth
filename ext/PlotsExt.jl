@@ -32,6 +32,7 @@ end
     L = round(loss(problem), sigdigits=4)
     xlab --> "times"
     ylab --> "volumes"
+    ylim --> (0.0, sqrt(2)*max(volumes...))
     title --> "$(pretty(p))\nloss: $L"
     @series begin
         label := "$model"
@@ -68,7 +69,7 @@ end
     errors = TumorGrowth.errors(comparison)
 
     continuous_times = range(etimes[1], stop=etimes[end], length=200)
-
+    ylim --> (0.0, sqrt(2)*max(evolumes...))
     xlab --> "time"
     ylab --> "volume"
     @series begin
