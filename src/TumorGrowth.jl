@@ -82,7 +82,7 @@ include("models/neural2.jl")
 include("pretty.jl")
 include("optimisers.jl")
 include("calibration.jl")
-include("model_comparison.jl")
+include("compare.jl")
 
 export patient_data,
     flat_patient_data,
