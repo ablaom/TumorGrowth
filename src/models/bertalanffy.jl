@@ -29,4 +29,7 @@ function scale_function(times, volumes, model::typeof(bertalanffy))
     return p -> (v0=volume_scale*p.v0, v∞=volume_scale*p.v∞, ω=p.ω/time_scale, λ=p.λ)
 end
 
-constraint_function(model::typeof(bertalanffy)) = constraint_function(classical_bertalanffy)
+constraint_function(model::typeof(bertalanffy)) =
+    constraint_function(classical_bertalanffy)
+
+n_iterations(::typeof(bertalanffy)) = 20000

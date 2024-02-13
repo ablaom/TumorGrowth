@@ -5,3 +5,7 @@ function DOC_PARAMS(k, ode)
     "volume at time `times[1]` and the other parameters are explained in "*
     "the [`TumorGrowth.$ode`](@ref) document string"
 end
+
+const WARN_TRANSFORM = "`inverse` does not appear to be a true inverse of "*
+    "`transform`. Perhaps you specified `transform` but forgot to specify "*
+    "`inverse`? "

@@ -7,15 +7,6 @@ const ERR_MISMATCH = DimensionMismatch(
     "number of models (which must be a vector other iterable). "
 )
 
-options(model) =
-    (; learning_rate=0.0001, penalty=0.8)
-options(model::Union{Neural,Neural2}) =
-    (; learning_rate=0.01, frozen=(; v∞=nothing))
-
-n_iterations(model) = 10000
-n_iterations(::typeof(bertalanffy2)) = 20000
-n_iterations(::Union{Neural,Neural2}) = 1500
-
 mae(ŷ, y) = abs.(ŷ .- y) |> mean
 
 struct ModelComparison{T<:Real, MTuple<:Tuple, OTuple<:Tuple, N, M, PTuple<:Tuple}

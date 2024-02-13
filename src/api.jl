@@ -45,3 +45,29 @@ Fallback returns `true` always.
 
 """
 constraint_function(model) = _ -> true
+
+
+"""
+    options(model)
+
+Default calibration options for `model` in model comparisons.
+
+# New model implementations
+
+Fallback returns `(learning_rate=0.0001, penalty=0.8)`
+
+"""
+options(model) = (learning_rate=0.0001, penalty=0.8)
+
+"""
+    n_iterations(model)
+
+Default number of iterations to run calibration of `model` in model comparisons.
+
+# New model implementations
+
+Fallback returns 10000
+
+
+"""
+n_iterations(model) = 10000
