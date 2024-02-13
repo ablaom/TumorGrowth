@@ -1,6 +1,6 @@
 """
 
-TumorGrowth.jl provides the following models (ODE solvers) for tumor growth:
+TumorGrowth.jl provides the following models for tumor growth:
 
 | model                           | description                             | parameters, `p`       | analytic? | ODE                                     |
 |:--------------------------------|:----------------------------------------|:----------------------|:----------|:----------------------------------------|
@@ -13,8 +13,8 @@ TumorGrowth.jl provides the following models (ODE solvers) for tumor growth:
 | [`neural(rng, network)`](@ref)  | 1D neural ODE with Lux.jl `network`     | `(; v0, v∞, θ)`       | no        | [`TumorGrowth.neural_ode`](@ref)        |
 | [`neural2(rng, network)`](@ref) | 2D neural ODE with Lux.jl `network`     | `(; v0, v∞, θ)`       | no        | [`TumorGrowth.neural_ode`](@ref)        |
 
-A model is a callable object that outputs a sequence of lesion volumes, given times and
-parameters:
+Here a *model* is a callable object, that outputs a sequence of lesion volumes, given
+times and paramters, by solving a related ordinary differential equation with parameters:
 
 ```julia
 using TumorGrowth
