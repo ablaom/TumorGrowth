@@ -6,7 +6,7 @@ using UnPack
 
 # Plots.jl linestyle options are [:auto, :solid, :dash, :dot, :dashdot, :dashdotdot]
 
-linestyle(::Any) = :auto
+linestyle(::Any) = :solid
 linestyle(::typeof(gompertz)) = :dashdot
 linestyle(::typeof(classical_bertalanffy)) = :dash
 linestyle(::typeof(bertalanffy)) = :solid

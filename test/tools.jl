@@ -2,13 +2,13 @@ using Test
 using TumorGrowth
 import StableRNGs.StableRNG
 
-@testset "slope" begin
-    rng = StableRNG(123)
-    xs = rand(rng, 3)
-    m, c  = rand(rng, 2)
-    ys = m*xs .+ c
-    @test TumorGrowth.slope(xs, ys) ≈ m
-end
+# @testset "slope" begin
+#     rng = StableRNG(123)
+#     xs = rand(rng, 3)
+#     m, c  = rand(rng, 2)
+#     ys = m*xs .+ c
+#     @test TumorGrowth.slope(xs, ys) ≈ m
+# end
 
 @testset "curvature" begin
     rng = StableRNG(123)

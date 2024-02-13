@@ -5,10 +5,11 @@ test_names = [
     "functor",
     "patient_data",
     "odes",
-    "solutions",
-    "model_comparison", # this must run before "optimisers" and "calibration"
+    "models",
+    "compare", # this must run before "optimisers" and "calibration"
     "optimisers",
     "calibration",
+    "integration",
 ]
 
 names = isempty(ARGS) ? test_names : ARGS
