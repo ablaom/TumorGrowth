@@ -63,7 +63,7 @@ grab(x::Nothing, y) = y
 *Private method.*
 
 Return a new tuple by replacing any `nothing` values with the corresponding value in the
-`from` tuple, whenever a corresponding key exists, and otherwise not make the replacement.
+`from` tuple, whenever a corresponding key exists, and otherwise ignore.
 
 ```julia
 julia> recover((x=1, y=nothing, z=3, w=nothing), (x=10, y=2, k=7))
@@ -78,4 +78,19 @@ function recover(tup, from)
         grab(getproperty(tup, name), get(from, name, nothing))
     end
     return NamedTuple{names}(new_vals)
+end
+
+"""
+    TumorGrowth.merge(x, y::NamedTuple)
+
+*Private method.*
+
+Ordinary merge if `x` is also a named tuple. More generally, first deconstruct `x` using
+[`TumorGrowth.functor`](@ref), merge as usual, and reconstruct.
+
+"""
+merge(x, y) = Base.merge(x, y)
+function merge(x::ComponentArray, y)
+    p, reconstruct = TumorGrowth.functor(x)
+    return merge(p, y) |> reconstruct
 end

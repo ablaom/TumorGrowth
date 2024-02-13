@@ -6,95 +6,6 @@ const ERR_UNRECOGNIZED_KEY = ArgumentError(
 )
 
 
-# # HEURISTICS TO GUESS INITIAL PARAMETER VALUES AND THEIR SCALES
-
-const BertalanffyModel =
-        Union{typeof(bertalanffy),typeof(bertalanffy_numerical)}
-const ClassicalModel =
-    Union{typeof(gompertz),typeof(logistic),typeof(classical_bertalanffy)}
-const NeuralModel = Union{Neural,Neural2}
-
-guess_parameters(times, volumes, model) = nothing
-function guess_parameters(times, volumes, ::ClassicalModel)
-    v0 = first(volumes)
-    non_zero_volumes = filter(v -> v > eps(float(eltype(volumes))), volumes)
-    isempty(non_zero_volumes) &&
-        error("All provided volumes are too small for meaningful calibration. ")
-    v∞ = last(non_zero_volumes)
-    τ1 = min(times...)
-    τ2 = max(times...)
-    v1 = min(non_zero_volumes...)
-    v2 = max(volumes...)
-    ω = (log(v2) - log(v1))/(τ2 - τ1)
-    return (; v0, v∞, ω)
-end
-guess_parameters(times, volumes, ::BertalanffyModel) =
-        merge(guess_parameters(times, volumes, gompertz), (; λ=1/3))
-function guess_parameters(times, volumes, ::typeof(bertalanffy2))
-    κ = 0.5*sign(TumorGrowth.curvature(times, volumes))
-    fallback =  merge(guess_parameters(times, volumes, bertalanffy), (; γ=κ))
-
-    problem = CalibrationProblem(
-        times,
-        volumes,
-        bertalanffy;
-        learning_rate=0.0001,
-        penalty=1.0,
-    )
-
-    try
-        outcomes = solve!(problem, Step(1), InvalidValue(), NumberLimit(1000))
-        outcomes[2][2].done && return fallback # out of bounds
-        return merge(solution(problem), (; γ=κ))
-    catch
-        return fallback
-    end
-
-end
-function guess_parameters(times, volumes, model::NeuralModel)
-        v0 = first(volumes)
-        v∞ = sum(volumes)/length(volumes)
-        θ = initial_parameters(model)
-        return (; v0, v∞, θ)
-end
-
-scale_function(times, volumes, model) = identity
-function scale_function(times, volumes, model::ClassicalModel)
-    p = guess_parameters(times, volumes, model)
-    volume_scale = abs(p.v∞)
-    time_scale = 1/abs(p.ω)
-    return p -> (v0=volume_scale*p.v0, v∞=volume_scale*p.v∞, ω=p.ω/time_scale)
-end
-function scale_function(times, volumes, model::BertalanffyModel)
-    p = guess_parameters(times, volumes, model)
-    volume_scale = abs(p.v∞)
-    time_scale = 1/abs(p.ω)
-    return p -> (v0=volume_scale*p.v0, v∞=volume_scale*p.v∞, ω=p.ω/time_scale, λ=p.λ)
-end
-function scale_function(times, volumes, model::typeof(bertalanffy2))
-    p = guess_parameters(times, volumes, model)
-    volume_scale = abs(p.v∞)
-    time_scale = 1/abs(p.ω)
-    p ->
-        (v0=volume_scale*p.v0, v∞=volume_scale*p.v∞, ω=p.ω/time_scale, λ=p.λ, γ=p.γ)
-end
-function scale_function(times, volumes, model::NeuralModel)
-        volume_scale = sum(volumes)/length(volumes)
-        return p ->  (v0=volume_scale*p.v0, v∞=volume_scale*p.v∞, θ=p.θ)
-end
-
-
-# # CONSTRAINT FUNCTIONS
-
-constraint_function(model) = _ -> true
-constraint_function(model::Union{
-    ClassicalModel,
-    BertalanffyModel,
-    NeuralModel,
-    typeof(bertalanffy2),
-}) = p -> p.v0 > 0 && p.v∞ > 0
-
-
 # # PENALTY HELPER
 
 @inline function factor(p, penalty)
@@ -103,7 +14,7 @@ constraint_function(model::Union{
 end
 
 
-# # OPTIMIZATION PROBLEM FOR A SINGLE PATIENT RECORD
+# # CALIBRATION PROBLEMS
 
 mutable struct CalibrationProblem{T,M,C}
     times::Vector{T}
@@ -129,14 +40,16 @@ end
 Specify a problem concerned with optimizing the parameters of a tumor growth `model`,
 given measured `volumes` and corresponding `times`.
 
-Here `model` can be one of: `bertalanffy`, `bertalanffy_numerical`, `bertalanffy2`, `gompertz`,
-`logistic`, `classical_bertalanffy`.
+See [`TumorGrowth`](@ref) for a list of possible `model`s.
 
 Default optimisation is by Adam gradient descent, using a sum of squares loss. Call
 `solve!` on a problem to carry out optimisation, as shown in the example below. See
 "Extended Help" for advanced options, including early stopping.
 
 Initial values of the parameters are inferred by default.
+
+Unless frozen (see "Extended help" below), the calibration process learns an initial
+condition `v0` which is generally different from `volumes[1]`.
 
 # Simple solve
 
@@ -195,25 +108,6 @@ using Plots
 scatter(times, volumes, xlab="time", ylab="volume", label="train")
 plot!(problem, label="prediction")
 ```
-
-# Models
-
-A `model` can be any callable object returning volumes given times and parameters, as in
-`predicted_volumes = model(times, p)`. TumorGrowth.jl supplies the following built-in
-models:
-
-| model                           | description                             | parameters, `p`       | analytic? | ODE                                     |
-|:--------------------------------|:----------------------------------------|:----------------------|:----------|:----------------------------------------|
-| [`bertalanffy`](@ref)           | generalized Bertalanffy (GB)            | `(; v0, v∞, ω, λ)`    | yes       | [`TumorGrowth.bertalanffy_ode`](@ref)   |
-| [`bertalanffy_numerical`](@ref) | generalized Bertalanffy (testing only)  | `(; v0, v∞, ω, λ)`    | no        | [`TumorGrowth.bertalanffy_ode`](@ref)   |
-| [`bertalanffy2`](@ref)          | 2D extension of generalized Bertalanffy | `(; v0, v∞, ω, λ, γ)` | no        | [`TumorGrowth.bertalanffy2_ode!`](@ref) |
-| [`gompertz`](@ref)              | Gompertz (GB, `λ=0`)                    | `(; v0, v∞, ω)`       | yes       | [`TumorGrowth.bertalanffy_ode`](@ref)   |
-| [`logistic`](@ref)              | logistic/Verhulst (GB, `λ=-1`)          | `(; v0, v∞, ω)`       | yes       | [`TumorGrowth.bertalanffy_ode`](@ref)   |
-| [`classical_bertalanffy`](@ref) | classical Bertalanffy (GB, `λ=1/3`)     | `(; v0, v∞, ω)`       | yes       | [`TumorGrowth.bertalanffy_ode`](@ref)   |
-| [`neural2(rng, network)`](@ref) | neural2 ODE with Lux.jl `network`       | `(; v0, v∞, θ)`       | no        | [`TumorGrowth.neural_ode`](@ref)        |
-
-In every case `v0` is the initial volume (so that `predicted_volumes[1] == v0`). Note this
-can be different from `volumes[1]`.
 
 # Keyword options
 

@@ -5,7 +5,7 @@ test_names = [
     "functor",
     "patient_data",
     "odes",
-    "solutions",
+    "models",
     "model_comparison", # this must run before "optimisers" and "calibration"
     "optimisers",
     "calibration",
