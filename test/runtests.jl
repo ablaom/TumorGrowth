@@ -6,7 +6,7 @@ test_names = [
     "patient_data",
     "odes",
     "models",
-    "model_comparison", # this must run before "optimisers" and "calibration"
+    "compare", # this must run before "optimisers" and "calibration"
     "optimisers",
     "calibration",
     "integration",

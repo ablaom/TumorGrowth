@@ -1,9 +1,11 @@
-mutable struct Neural{O}
+mutable struct Neural{O,T,I}
     ode::O
+    transform::T
+    inverse::I
 end
 
 """
-    neural([rng,] network)
+    neural([rng,] network; transform=log, inverse=exp)
 
 Initialize the Lux.jl neural network, `network`, and return a callable object, `model`,
 for solving the associated one-dimensional neural ODE for volume growth, as detailed under
@@ -21,7 +23,8 @@ The returned object, `model`, is called like this:
 
 where `p` should have properties `v0`, `v∞`, `θ`, where `v0` is the initial volume (so
 that `volumes[1] = v0`), `v∞` is a volume scale parameter, and `θ` is a
-`network`-compatible Lux.jl parameter.
+`network`-compatible Lux.jl parameter. It seems that calibration works best if `v∞` is
+frozen.
 
 The form of `θ` is the same as `TumorGrowth.initial_parameters(model)`, which is also the
 default initial value used when solving an associated [`CalibrationProblem`](@ref).
@@ -54,7 +57,11 @@ julia> volumes = model(times, p) # (constant because of zero-initialization)
 See also [`neural2`](@ref), [`TumorGrowth.neural_ode`](@ref).
 
 """
-neural(args...) = Neural(neural_ode(args...))
+function neural(args...; transform=log, inverse=exp)
+    transform != log && inverse == exp && @warn WARN_TRANSFORM
+    inverse(transform(0.1234)) ≈ 0.1234 || @warn WARN_TRANSFORM
+    return Neural(neural_ode(args...), transform, inverse)
++end
 initial_parameters(model::Neural) = initial_parameters(model.ode)
 state(model::Neural) = state(model.ode)
 
@@ -62,7 +69,8 @@ function Base.show(io::IO, ::MIME"text/plain", model::Neural)
     n = Lux.parameterlength(model.ode.θ0)
     print(
         io,
-        "Neural model, (times, v0, v∞, θ) -> volumes, where length(θ) = $n",
+        "Neural model, (times, p) -> volumes, where length(p) = $(n + 2)\n",
+        "  transform: $(model.transform)"
     )
 end
 function Base.show(io::IO, model::Neural)
@@ -79,9 +87,11 @@ function (model::Neural)(
     sensealg = Sens.InterpolatingAdjoint(; autojacvec = Sens.ZygoteVJP()),
     kwargs..., # other `DifferentialEquations.solve` kwargs, eg, `reltol`, `abstol`
     )
-    ode = model.ode
+
+    @unpack ode, transform, inverse  = model
     tspan = (times[1], times[end])
-    X0=[v0/v∞,]
+    y0 = transform(v0/v∞)
+    X0=[y0,]
     problem = DE.ODEProblem(ode, X0, tspan, θ)
     solution = DE.solve(
         problem,
@@ -90,7 +100,7 @@ function (model::Neural)(
         sensealg,
     )
     # return to original scale:
-    return v∞*first.(solution.u)
+    return v∞*inverse.(first.(solution.u))
 end
 (model::Neural)(times, p; kwargs...) = model(times, p.v0, p.v∞, p.θ; kwargs...)
 
@@ -107,3 +117,7 @@ function scale_function(times, volumes, model::Neural)
 end
 
 constraint_function(::Neural) = constraint_function(classical_bertalanffy)
+
+options(::Neural) = (; learning_rate=0.001, frozen=(; v∞=nothing), penalty=0.05)
+
+n_iterations(::Neural) = 2500

@@ -60,7 +60,7 @@ mape(yhat, y) = sum(broadcast(normalized_absolute_difference, yhat, y))/length(y
         volumes_true,
         model;
         frozen = (; v∞=nothing),
-        learning_rate=0.0001,
+        learning_rate=0.001,
         half_life=48.0,
     )
 
@@ -82,7 +82,8 @@ mape(yhat, y) = sum(broadcast(normalized_absolute_difference, yhat, y))/length(y
     @test loss(problem) < bertalanffy2_loss
 
     # check that `v∞` was indeed frozen:
-    @test solution(problem).v∞ == TumorGrowth.guess_parameters(times, volumes_true, model).v∞
+    @test solution(problem).v∞ ==
+        TumorGrowth.guess_parameters(times, volumes_true, model).v∞
 end
 
 true

@@ -154,8 +154,8 @@ function CalibrationProblem(
     volumes,
     model;
     p0=guess_parameters(times, volumes, model),
-    scale=scale_function(times, volumes, model),
-    g=constraint_function(model),
+    scale=TumorGrowth.scale_function(times, volumes, model),
+    g=TumorGrowth.constraint_function(model),
     frozen = NamedTuple(),
     half_life = Inf,
     penalty = 0.0,
