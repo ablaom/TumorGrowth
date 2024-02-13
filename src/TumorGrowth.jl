@@ -14,7 +14,7 @@ TumorGrowth.jl provides the following models for tumor growth:
 | [`neural2(rng, network)`](@ref) | 2D neural ODE with Lux.jl `network`     | `(; v0, v∞, θ)`       | no        | [`TumorGrowth.neural_ode`](@ref)        |
 
 Here a *model* is a callable object, that outputs a sequence of lesion volumes, given
-times and parameters, by solving a related ordinary differential equation with parameters:
+times, by solving a related ordinary differential equation with parameters (`p` below):
 
 ```julia
 using TumorGrowth
