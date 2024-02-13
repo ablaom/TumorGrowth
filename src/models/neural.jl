@@ -118,6 +118,6 @@ end
 
 constraint_function(::Neural) = constraint_function(classical_bertalanffy)
 
-options(::Neural) = (; learning_rate=0.001, frozen=(; v∞=nothing), penalty=0.05)
+options(::Neural) = (; learning_rate=0.001, frozen=(; v∞=nothing), penalty=0.3)
 
 n_iterations(::Neural) = 2500
