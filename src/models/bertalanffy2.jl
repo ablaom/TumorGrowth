@@ -46,9 +46,8 @@ function bertalanffy2(
     problem = DE.ODEProblem(bertalanffy2_ode!, q0, tspan, p)
     solution = DE.solve(problem, DE.Tsit5(); saveat, reltol, sensealg, kwargs...)
     # return to original scale:
-    # aspirational || return v∞ .* first.(solution.u)
-    # return v∞ .* solution.u
-    return v∞ .* first.(solution.u)
+    aspirational || return v∞ .* first.(solution.u)
+    return v∞ .* solution.u
 end
 
 function guess_parameters(times, volumes, ::typeof(bertalanffy2))
