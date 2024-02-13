@@ -99,7 +99,7 @@ julia> loss(problem)
 7.609310030658547e-10
 ```
 
-See [IterationControl.jl](https://github.com/JuliaAI/IterationControl) for all options.
+See [IterationControl.jl](https://github.com/JuliaAI/IterationControl.jl) for all options.
 
 # Visualizing results
 
