@@ -39,7 +39,7 @@ using Plots
 julia> plot(comparison)
 ```
 
-![](assets/comparison)
+![comparison plot](assets/comparison.png)
 
 
 ### Acknowledgements
