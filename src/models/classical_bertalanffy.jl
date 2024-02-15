@@ -6,7 +6,7 @@ Bertalanffy model for lesion growth. $(DOC_PARAMS(3, bertalanffy_ode)).
 
 This is the `λ=1/3` case of the [`bertalanffy`](@ref) model.
 
-See also [`bertalanffy`](@ref), [`bertalanffy2`](@ref).
+$DOC_SEE_ALSO
 
 """
 classical_bertalanffy(times, p) = bertalanffy(times, TumorGrowth.merge(p, (; λ=1/3)))

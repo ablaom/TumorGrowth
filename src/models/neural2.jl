@@ -9,13 +9,7 @@ end
 
 Initialize the Lux.jl neural network, `network`, and return a callable object, `model`,
 for solving the associated two-dimensional neural2 ODE for volume growth, as detailed
-under "The ODE" below.
-
-!!! important
-
-    Here `network` must accept *two* inputs and deliver *two* outputs. For purposes of
-    calibration, it may be helpful to use zero-initialization for the first layer. See the
-    example below.
+under "Underlying ODE" below.
 
 The returned object `model` is called like this:
 
@@ -23,8 +17,9 @@ The returned object `model` is called like this:
 
 where `p` should have properties `v0`, `v∞`, `θ`, where `v0` is the initial volume (so
 that `volumes[1] = v0`), `v∞` is a volume scale parameter, and `θ` is a
-`network`-compatible Lux.jl parameter. It seems that calibration works best if `v∞` is
-frozen.
+`network`-compatible Lux.jl parameter.
+
+It seems that calibration works best if `v∞` is frozen.
 
 The form of `θ` is the same as `TumorGrowth.initial_parameters(model)`, which is also the
 default initial value used when solving an associated [`CalibrationProblem`](@ref).
@@ -52,11 +47,20 @@ julia> volumes = model(times, p) # (constant because of zero-initialization)
  0.00023
 ```
 
-# The ODE
+# Underlying ODE
 
-...
+View the neural network (with fixed parameter `θ`) as a mathematical function ``f``, with
+components `f₁` and `f₂`, and write ``ϕ`` for the `transform` function. Then ``v(t) =
+ϕ^{-1}(y(t))``, where `y(t)`, and a latent variable `u(t)`, evolve according to
 
-See also [`neural`](@ref), [`TumorGrowth.neural_ode`](@ref).
+``dy/dt = f₁(v, u)``
+
+``du/dt = f₂(v, u)``
+
+subject to the initial conditions ``y(t₀) = ϕ(v0)``, ``u(t₀) = 1``, where ``t₀`` is the
+initial time, `times[1]`.
+
+$DOC_SEE_ALSO See also [`CalibrationProblem`](@ref).
 
 """
 function neural2(args...; transform=log, inverse=exp)
@@ -89,6 +93,8 @@ function (model::Neural2)(
     sensealg = Sens.InterpolatingAdjoint(; autojacvec = Sens.ZygoteVJP()),
     kwargs..., # other `DifferentialEquations.solve` kwargs, eg, `reltol`, `abstol`
     )
+
+    times == sort(times) || throw(ERR_UNORDERED_TIMES)
 
     @unpack ode, transform, inverse  = model
     tspan = (times[1], times[end])

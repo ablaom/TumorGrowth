@@ -6,7 +6,7 @@ Return volumes for specified `times`, based on anaytic solutions to the classica
 
 This is the `λ=-1` case of the [`bertalanffy`](@ref) model.
 
-See also [`bertalanffy`](@ref), [`bertalanffy2`](@ref).
+$DOC_SEE_ALSO
 
 """
 logistic(times, p) = bertalanffy(times, TumorGrowth.merge(p, (; λ=-1.0)))
