@@ -45,8 +45,6 @@ minimise a (possibly weighted) least-squares error on provided clinical measurem
 uses the adjoint method to auto-differentiate solutions to the underlying ODE's, with
 respect to the ODE parameters, and initial conditions to be optimised.
 
-For further details, see [Quick start](@ref).
-
 """
 module TumorGrowth
 
