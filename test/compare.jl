@@ -15,7 +15,8 @@ models = [logistic, bertalanffy]
 holdouts = 2
 options = TumorGrowth.options.(models)
 n_iters = TumorGrowth.n_iterations.(models)
-errs, ps = TumorGrowth.errors(times, volumes, models, holdouts, options, n_iters)
+errs, ps =
+    TumorGrowth.errors(times, volumes, models, holdouts, options, n_iters, false, false)
 
 # compute the `bertalanffy` error by hand:
 problem = CalibrationProblem(times[1:end-2], volumes[1:end-2], bertalanffy; options[2]...)

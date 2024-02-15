@@ -8,22 +8,8 @@ end
 """
     bertalanffy_ode(v, p, t)
 
-Based on the general TumorGrowth.model, return the rate in change in volume at time `t`,
-for a current volume of `v`. This first order, autonomous, one-dimensionaly ODE model is
-given by
-
-`` dv/dt = ω((v∞/v)^λ - 1)/λ)v; v>0``
-
-where `[v∞, ω, λ] == p` are parameters::
-
--  ``v∞`` is the steady state solution, stable and unique, assuming ``ω > 0``
-- ``1/ω`` has the units of time
-- ``λ`` is dimensionless
-
-When ``λ = -1``, one recovers the logistic (Verhulst) model, while ``λ = 1/3`` gives the
-classical TumorGrowth.model.  In the case ``λ = 0``, the implementation replaces
-``((v∞/v)^λ - 1)/λ`` with its limiting value ``\\log(v∞/v)`` to recover the Gompertz
-model.
+Based on the generalized Bertalanffy model, return the rate in change in volume at time
+`t`, for a current volume of `v`. For details, see [`bertalanffy`](@ref).
 
 """
 function bertalanffy_ode(v, p, t)
@@ -34,28 +20,10 @@ end
 """
     bertalanffy2_ode!(dX, X, p, t)
 
-A two-dimensional extension of the generalized TumorGrowth.model for lesion growth (see
-[`bertalanffy_ode`](@ref)). Here `X = [v, u]`, where `v` is volume at time `t` and `u` is
-the "aspirational volume" at time `t`, a latent variable. The time derivatives are written
-to `dX`. Specifically, `dX` will have these components:
-
-`` dv/dt = ω((u/v)^λ - 1)/λ)v``
-`` du/dt = γωu; ``
-
-
-where `[ω, λ, γ] == p` are fixed parameters:
-
-- ``1/ω`` has units of time
-- ``λ`` is dimensionless
-- ``γ`` is dimensionless
-
-When ``γ = 0`` the model collapses to the (one-dimensional) TumorGrowth.model. In that
-special case, ``λ = -1``, gives the logistic (Verhulst) model, while ``λ = 1/3`` gives the
-classical TumorGrowth.model.  In the case ``λ = 0``, the implementation replaces
-``((u/v)^λ - 1)/λ`` with its limiting value ``\\log(u/v)`` to recover the Gompertz
-model when also ``γ = 0``.
-
-Since `u` is a latent variable, its initial value is an additional model parameter.
+A two-dimensional extension of the ODE describing the generalized Bertalanffy model for
+lesion growth.  Here `X = [v, u]`, where `v` is volume at time `t` and `u` is the
+"carrying capacity" at time `t`, a latent variable. The time derivatives are written to
+`dX`. For the specific form of the ODE, see [`bertalanffy2`](@ref).
 
 """
 function bertalanffy2_ode!(dX, X, p, t)

@@ -77,8 +77,8 @@ function IterationControl.train!(problem::OptimisationProblem, n)
             problem.state = state
         else
             problem.inbounds=false
-            @warn "Returning `Inf` loss, as solution is out of bounds; solution reverted "*
-                "to last inbounds value. Perhaps try a "*
+            @warn "Solution out of bounds; solution reverted "*
+                "to last in-bounds value. Perhaps try a "*
                 "smaller `learning_rate`, larger `penalty`, "*
                 "or freeze some components. Out of bounds value:"*
                 "\n$x"

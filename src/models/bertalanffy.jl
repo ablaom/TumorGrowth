@@ -7,9 +7,18 @@ bertalanffy_analytic_solution(t, v0, v∞, ω, λ) =
     bertalanffy(times, p)
 
 Return volumes for specified `times`, based on the analytic solution to the generalized
-    Bertalanffy model for lesion growth.  $(DOC_PARAMS(4, :bertalanffy_ode)).
+Bertalanffy model for lesion growth.  $(DOC_PARAMS(4, :bertalanffy_ode)). Other parameters
+are explained below.
 
-See also [`bertalanffy2`](@ref).
+Special cases of the model are:
+
+- [`logistic`](@ref) (`λ = -1`)
+- [`classical_bertalanffy`](@ref)  (`λ = 1/3`)
+- [`gompertz`](@ref) (`λ = 0`)
+
+$DOC_BERTALANFFY_ODE
+
+$DOC_SEE_ALSO
 
 """
 function bertalanffy(times, p)

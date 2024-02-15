@@ -20,7 +20,7 @@ using TumorGrowth, Lux, Random
 times = [0.1, 6.0, 12.0, 18.0, 25.0, 30.0, 35.0, 41.0, 47.0]
 volumes = [0.013, 0.0072, 0.0043, 0.0021, 0.0043, 0.0043, 0.0044, 0.0058, 0.015]
 
-# define a model based on a neural ODE:
+# define an experimental model based on a neural ODE:
 network = Lux.Chain(Dense(2, 3, Lux.tanh; init_weight=Lux.zeros64), Dense(3, 2))
 neural_model = neural2(Random.default_rng(), network)
 

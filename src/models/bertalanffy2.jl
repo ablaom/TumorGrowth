@@ -1,32 +1,49 @@
 """
-    bertalanffy2(times, p; aspirational=false, solve_kwargs...)
+    bertalanffy2(times, p; capacity=false, solve_kwargs...)
 
 Return volumes for specified `times`, based on numerical solutions to a two-dimensional
-extension of generalized Bertalanffy model for lesion growth. Here $(DOC_PARAMS(5,
+extension of generalized Bertalanffy model for lesion growth. $(DOC_PARAMS(5,
 :bertalanffy2_ode!)).
 
 The usual generalized Bertalanffy model is recovered when `γ=0`. In that case, using
-[`bertalanffy`](@ref), which is based on an analytic solution, may be preferred.
-
-!!! important
-
-    It is assumed without checking that `times` is ordered: `times == sort(times)`.
+[`bertalanffy`](@ref), which is based on an analytic solution, may be preferred. Other
+parameters are explained below.
 
 # Keyword options
 
-- `aspirational=false`: Set to `true` to return the aspirational volumes, in addition to
-  the actual volumes.
+- `capacity=false`: Set to `true` to return the latent "carrying capacity" variable, in
+  addition to the actual volumes.
 
 - `solve_kwargs`: optional keyword arguments for the ODE solver,
   `DifferentialEquations.solve`, from DifferentialEquations.jl.
 
-See also [`bertalanffy`](@ref).
+# Underlying ODE
+
+In this model the carrying capacity of the [`bertalanffy`](@ref) model, ordinarily fixed,
+is introduced as a new latent variable ``u(t)``, which is allowed to evolve independently
+of the volume ``v(t)``, at a rate in proportion to its magnitude:
+
+`` dv/dt = ω B_λ(u/v) v``
+
+`` du/dt = γωu ``
+
+Here ``B_λ`` is the Box-Cox transformation with exponent ``λ``. See
+[`bertalanffy`](@ref). Also:
+
+- ``1/ω`` has units of time
+- ``λ`` is dimensionless
+- ``γ`` is dimensionless
+
+Since ``u`` is a latent variable, its initial value, `v∞ ≡ u(times[1])`, is an additional
+model parameter.
+
+$DOC_SEE_ALSO
 
 """
 function bertalanffy2(
     times,
     p;
-    aspirational=false,
+    capacity=false,
     saveat = times,
     reltol = 1e-7, # this default determined by experiments with patient with id
                    # "44f2f0cc8accfe91e86f0df74346a9d4-S3"; don't raise it without further
@@ -34,6 +51,8 @@ function bertalanffy2(
     sensealg = Sens.InterpolatingAdjoint(; autojacvec = Sens.ZygoteVJP()),
     kwargs..., # other DE.solve kwargs, eg, `reltol`, `abstol`
     )
+
+    times == sort(times) || throw(ERR_UNORDERED_TIMES)
 
     @unpack v0, v∞, ω, λ, γ = p
 
@@ -46,9 +65,8 @@ function bertalanffy2(
     problem = DE.ODEProblem(bertalanffy2_ode!, q0, tspan, p)
     solution = DE.solve(problem, DE.Tsit5(); saveat, reltol, sensealg, kwargs...)
     # return to original scale:
-    # aspirational || return v∞ .* first.(solution.u)
-    # return v∞ .* solution.u
-    return v∞ .* first.(solution.u)
+    capacity || return v∞ .* first.(solution.u)
+    return v∞ .* solution.u
 end
 
 function guess_parameters(times, volumes, ::typeof(bertalanffy2))
@@ -81,4 +99,3 @@ function scale_function(times, volumes, model::typeof(bertalanffy2))
 end
 
 constraint_function(::typeof(bertalanffy2)) = constraint_function(classical_bertalanffy)
-

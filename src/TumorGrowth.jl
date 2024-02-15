@@ -14,7 +14,7 @@ TumorGrowth.jl provides the following models for tumor growth:
 | [`neural2(rng, network)`](@ref) | 2D neural ODE with Lux.jl `network`     | `(; v0, v∞, θ)`       | no        | [`TumorGrowth.neural_ode`](@ref)        |
 
 Here a *model* is a callable object, that outputs a sequence of lesion volumes, given
-times and parameters, by solving a related ordinary differential equation with parameters:
+times, by solving a related ordinary differential equation with parameters (`p` below):
 
 ```julia
 using TumorGrowth
@@ -38,15 +38,12 @@ arguments for the [DifferentialEquations.jl](https://docs.sciml.ai/DiffEqDocs/st
 solver can be passed to the model call.
 
 TumorGrowth.jl also provides a [`CalibrationProblem`](@ref) tool to calibrate model
-parameters, given a history of measurements, and a [`compare`](@ref) tool to compare
-models on a holdout set.
+parameters, and a [`compare`](@ref) tool to compare models on a holdout set.
 
 Calibration is performed using a gradient descent optimiser to
 minimise a (possibly weighted) least-squares error on provided clinical measurements, and
 uses the adjoint method to auto-differentiate solutions to the underlying ODE's, with
 respect to the ODE parameters, and initial conditions to be optimised.
-
-For further details, see [Quick start](@ref).
 
 """
 module TumorGrowth
