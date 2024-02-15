@@ -47,7 +47,7 @@ end
             seriestype := :path
             linestyle := :dot
             xplot = range(times[1], times[end], length=200)
-            yplot = last.(model(xplot, p; aspirational=true))
+            yplot = last.(model(xplot, p; capacity=true))
             xplot, yplot
         end
     end
