@@ -2,12 +2,10 @@
 
 Predictive models for tumor growth, and tools to apply them to clinical data
 
-&#128679;
-
+[![Lifecycle:Experimental](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md) 
 [![Build Status](https://github.com/ablaom/TumorGrowth.jl/workflows/CI/badge.svg)](https://github.com/ablaom/TumorGrowth.jl/actions)
 [![Coverage](https://codecov.io/gh/ablaom/TumorGrowth.jl/branch/master/graph/badge.svg)](https://codecov.io/github/ablaom/TumorGrowth.jl?branch=master)
 [![Docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://ablaom.github.io/TumorGrowth.jl/dev/)
-
 
 Please refer to the [documentation](https://ablaom.github.io/TumorGrowth.jl/dev) for an
 overview of this package.
