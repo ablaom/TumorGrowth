@@ -67,14 +67,13 @@ end
         h = TumorGrowth.constraint_function(model)
         p = TumorGrowth.guess_parameters(times, volumes, model)
         @test h(p)
-        q = merge(p, (; v∞ = -p.v∞))
-        @test !h(q)
-        q = merge(p, (; v∞ = -p.v∞, v0 = -p.v0))
-        @test !h(q)
-        q = merge(p, (; v∞ = -p.v∞))
-        @test !h(q)
+        p = merge(p, (; v∞ = -p.v∞))
+        @test !h(p)
+        p = merge(p, (; v∞ = -p.v∞, v0 = -p.v0))
+        @test !h(p)
+        p = merge(p, (; v∞ = -p.v∞))
+        @test !h(p)
     end
-
     h = TumorGrowth.constraint_function("junk")
     @test h("a;lsjfd")
 end
