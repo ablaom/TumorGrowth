@@ -22,8 +22,12 @@ const DOC_BERTALANFFY_ODE =
     unless ``λ = 0``, in which case, ``B_λ(x) = \\log(x)``. Here:
 
     - ``v_∞``=`v∞` is the steady state solution, stable and unique, assuming ``ω >
-       0``; this is sometimes referred to as the *carrying capacity* - ``1/ω`` has the
-       units of time - ``λ`` is dimensionless
+       0``; this is sometimes referred to as the *carrying capacity*
+
+    - ``1/ω`` has the
+       units of time
+
+    - ``λ`` is dimensionless
 
     """
 
