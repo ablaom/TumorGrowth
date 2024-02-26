@@ -1,6 +1,6 @@
 """
 
-TumorGrowth.jl provides the following models for tumor growth:
+TumorGrowth.jl provides the following models for tumor growth: 
 
 | model                           | description                             | parameters, `p`       | analytic? |
 |:--------------------------------|:----------------------------------------|:----------------------|:----------|

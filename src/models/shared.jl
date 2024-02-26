@@ -16,15 +16,14 @@ const DOC_BERTALANFFY_ODE =
     In the generalized Bertalanffy model, the volume ``v > 0`` evolves according to the
     differential equation
 
-    `` dv/dt = ω B_λ(v∞/v) v,``
+    `` dv/dt = ω B_λ(v_∞/v) v,``
 
     where ``B_λ`` is the Box-Cox transformation, defined by ``B_λ(x) = (x^λ - 1)/λ``,
     unless ``λ = 0``, in which case, ``B_λ(x) = \\log(x)``. Here:
 
-    - ``v∞`` is the steady state solution, stable and unique, assuming ``ω > 0``; this is
-       sometimes referred to as the *carrying capacity*
-    - ``1/ω`` has the units of time
-    - ``λ`` is dimensionless
+    - ``v_∞``=`v∞` is the steady state solution, stable and unique, assuming ``ω >
+       0``; this is sometimes referred to as the *carrying capacity* - ``1/ω`` has the
+       units of time - ``λ`` is dimensionless
 
     """
 
