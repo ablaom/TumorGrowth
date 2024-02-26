@@ -51,14 +51,14 @@ julia> volumes = model(times, p) # (constant because of zero-initialization)
 
 View the neural network (with fixed parameter `θ`) as a mathematical function ``f``, with
 components `f₁` and `f₂`, and write ``ϕ`` for the `transform` function. Then ``v(t) =
-ϕ^{-1}(y(t))``, where `y(t)`, and a latent variable `u(t)`, evolve according to
+v_∞ ϕ^{-1}(y(t))``, where ``y(t)``, and a latent variable `u(t)`, evolve according to
 
-``dy/dt = f₁(v, u)``
+``dy/dt = f₁(y, u)``
 
-``du/dt = f₂(v, u)``
+``du/dt = f₂(y, u)``
 
-subject to the initial conditions ``y(t₀) = ϕ(v0)``, ``u(t₀) = 1``, where ``t₀`` is the
-initial time, `times[1]`.
+subject to the initial conditions ``y(t₀) = ϕ(v₀/v_∞)``, ``u(t₀) = 1``, where ``t₀`` is the
+initial time, `times[1]`. We are writing ``v₀``=`v0` and ``v_∞``=`v∞`.
 
 $DOC_SEE_ALSO See also [`CalibrationProblem`](@ref).
 
