@@ -8,7 +8,7 @@ end
     neural2([rng,] network; transform=log, inverse=exp)
 
 Initialize the Lux.jl neural network, `network`, and return a callable object, `model`,
-for solving the associated two-dimensional neural2 ODE for volume growth, as detailed
+for solving the associated two-dimensional neural ODE for volume growth, as detailed
 under "Underlying ODE" below.
 
 The returned object `model` is called like this:
