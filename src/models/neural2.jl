@@ -8,7 +8,7 @@ end
     neural2([rng,] network; transform=log, inverse=exp)
 
 Initialize the Lux.jl neural network, `network`, and return a callable object, `model`,
-for solving the associated two-dimensional neural2 ODE for volume growth, as detailed
+for solving the associated two-dimensional neural ODE for volume growth, as detailed
 under "Underlying ODE" below.
 
 The returned object `model` is called like this:
@@ -50,8 +50,8 @@ julia> volumes = model(times, p) # (constant because of zero-initialization)
 # Underlying ODE
 
 View the neural network (with fixed parameter `θ`) as a mathematical function ``f``, with
-components `f₁` and `f₂`, and write ``ϕ`` for the `transform` function. Then ``v(t) =
-v_∞ ϕ^{-1}(y(t))``, where ``y(t)``, and a latent variable `u(t)`, evolve according to
+components ``f₁`` and ``f₂``, and write ``ϕ`` for the `transform` function. Then ``v(t) =
+v_∞ ϕ^{-1}(y(t))``, where ``y(t)``, and a latent variable ``u(t)``, evolve according to
 
 ``dy/dt = f₁(y, u)``
 
