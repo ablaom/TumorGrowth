@@ -5,10 +5,10 @@
 # form.
 
 
-using Pkg
+using Pkg #!md
 dir = @__DIR__
-Pkg.activate(dir)
-Pkg.instantiate()
+Pkg.activate(dir) #!md
+Pkg.instantiate() #!md
 
 using TumorGrowth
 using Statistics

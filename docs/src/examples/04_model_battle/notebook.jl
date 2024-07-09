@@ -41,10 +41,10 @@
 # |           **bertalanffy2** |         draw |                       draw |               ↑ |              n/a |          draw |             ← |
 # |              **1D neural** |         draw |                       draw |            draw |             draw |           n/a |             ← |
 
-using Pkg
+using Pkg #!md
 dir = @__DIR__
-Pkg.activate(dir)
-Pkg.instantiate()
+Pkg.activate(dir) #!md
+Pkg.instantiate() #!md
 
 using Random
 using Statistics

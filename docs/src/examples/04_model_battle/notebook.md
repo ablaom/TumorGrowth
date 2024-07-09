@@ -44,10 +44,7 @@ bootstrap winners in the top row or first column.
 |              **1D neural** |         draw |                       draw |            draw |             draw |           n/a |             ← |
 
 ````@julia
-using Pkg
 dir = @__DIR__
-Pkg.activate(dir)
-Pkg.instantiate()
 
 using Random
 using Statistics

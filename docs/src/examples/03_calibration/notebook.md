@@ -9,10 +9,7 @@ The code below is also available in
 form.
 
 ````@julia
-using Pkg
 dir = @__DIR__
-Pkg.activate(dir)
-Pkg.instantiate()
 
 using TumorGrowth
 using Statistics
