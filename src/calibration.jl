@@ -144,7 +144,7 @@ plot!(problem, label="prediction")
 
 - `ode_options...`: optional keyword arguments for the ODE solver,
   `DifferentialEquations.solve`, from DifferentialEquations.jl. Not relevant for models
-  using analytic solutions (see the table at [`TumorGrowth`](@ref).y
+  using analytic solutions (see the table at [`TumorGrowth`](@ref)).
 
 """
 function CalibrationProblem(
