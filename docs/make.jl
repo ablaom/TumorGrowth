@@ -16,7 +16,7 @@ makedocs(;
              ],
              "Reference" => "reference.md",
              ],
-         sitename="TumorGrowth",
+         sitename="TumorGrowth.jl",
          warnonly = [:cross_references, :missing_docs],
 )
 
