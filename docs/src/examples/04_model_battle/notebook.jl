@@ -1,5 +1,9 @@
 # # Model Battle
 
+# The analysis below is also available in
+# [notebook](https://github.com/ablaom/TumorGrowth.jl/tree/dev/docs/src/examples/04_model_battle/)
+# form.
+
 # **Note.** The `@threads` cell in this notebook takes about 4 hours to complete on a
 # 2018 MacBook Pro:
 
@@ -138,7 +142,11 @@ errors = errors[good_error_rows,:];
 
 plt = histogram(errors[:, 1], normalize=:pdf, alpha=0.4)
 histogram!(errors[:, 5], normalize=:pdf, alpha=0.4)
-plt
+gui()
+
+#-
+
+savefig(joinpath(dir, "errors_distribution.png"))
 
 # We deem a student t-test inappopriate and instead compute bootstrap confidence intervals
 # for pairwise differences in model errors:

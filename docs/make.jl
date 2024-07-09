@@ -6,7 +6,14 @@ makedocs(;
          format=Documenter.HTML(),
          pages=[
              "Overview" => "index.md",
+             "Installation" => "installation.md",
              "Quick start" => "quick_start.md",
+             "Calibration" => "calibration.md",
+             "Model comparison" => "comparison.md",
+             "Extended examples" => [
+                 "Calibration workflows" => "examples/03_calibration/notebook.md",
+                 "Model battle" => "examples/04_model_battle/notebook.md",
+             ],
              "Reference" => "reference.md",
              ],
          sitename="TumorGrowth",
