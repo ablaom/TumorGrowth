@@ -24,7 +24,7 @@ solve!(problem, 2000)  # apply 2000 iterations of the calibration algorithm
 p = solution(problem)
 pretty(p)
 ```
-For advanced  options, see [`CalibrationProblem`](@ref).
+For advanced  options, see [`CalibrationProblem`](@ref) or the [Calibration workflows](@ref) extended example. 
 
 We can visualize the outcome and make predictions for an extended time period:
 
