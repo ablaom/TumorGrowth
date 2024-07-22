@@ -30,13 +30,13 @@ function bertalanffy_numerical(
 
     # We rescale volumes by `v∞` before sending to solver. It is tempting to perform a
     # time-rescaling, but an issue prevents this:
-    # https://discourse.julialang.org/t/time-normalisation-results-in-nothing-gradients-of-ode-solutions/109353
+    # https://github.com/SciML/SciMLSensitivity.jl/issues/1002
     tspan = (times[1], times[end])
     p_ode = [1.0, ω, λ]
-    problem = DE.ODEProblem(bertalanffy_ode, v0/v∞, tspan, p_ode)
+    problem = DE.ODEProblem(bertalanffy_ode, [v0/v∞,], tspan, p_ode)
     solution = DE.solve(problem, DE.Tsit5(); saveat, sensealg, kwargs...)
     # return to original scale:
-    return v∞ .* solution.u
+    return v∞ .* first.(solution.u)
 end
 
 guess_parameters(times, volumes, ::typeof(bertalanffy_numerical)) =
