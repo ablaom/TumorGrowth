@@ -10,6 +10,7 @@ TumorGrowth.jl provides the following models for tumor growth:
 | [`gompertz`](@ref)              | Gompertz (GB, `λ=0`)                    | `(; v0, v∞, ω)`       | yes       |
 | [`logistic`](@ref)              | logistic/Verhulst (GB, `λ=-1`)          | `(; v0, v∞, ω)`       | yes       |
 | [`classical_bertalanffy`](@ref) | classical Bertalanffy (GB, `λ=1/3`)     | `(; v0, v∞, ω)`       | yes       |
+| [`exponential`](@ref)           | exponential decay or growth             | `(; v0, ω)`           | yes       |
 | [`neural(rng, network)`](@ref)  | 1D neural ODE with Lux.jl `network`     | `(; v0, v∞, θ)`       | no        |
 | [`neural2(rng, network)`](@ref) | 2D neural ODE with Lux.jl `network`     | `(; v0, v∞, θ)`       | no        |
 
@@ -74,6 +75,7 @@ include("models/bertalanffy_numerical.jl")
 include("models/classical_bertalanffy.jl")
 include("models/gompertz.jl")
 include("models/logistic.jl")
+include("models/exponential.jl")
 include("models/neural.jl")
 include("models/neural2.jl")
 include("pretty.jl")
@@ -89,6 +91,7 @@ export patient_data,
     gompertz,
     logistic,
     classical_bertalanffy,
+    exponential,
     neural2,
     neural,
     CalibrationProblem,
