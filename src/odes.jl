@@ -11,10 +11,14 @@ end
 Based on the generalized Bertalanffy model, return the rate in change in volume at time
 `t`, for a current volume of `v`. For details, see [`bertalanffy`](@ref).
 
+Note here that `v`, and the return value, are *vectors* with a single element, rather than
+scalars.
+
 """
-function bertalanffy_ode(v, p, t)
+function bertalanffy_ode(V, p, t)
     v∞, ω, λ = p
-    return ω*boxcox(λ, v∞/v)*v
+    v = first(V)
+    return [ω*boxcox(λ, v∞/v)*v, ]
 end
 
 """

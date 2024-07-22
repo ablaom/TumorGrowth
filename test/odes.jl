@@ -9,10 +9,10 @@ end
 
 @testset "bertalanffy_ode" begin
     v∞, ω, λ = 2, 7, 0
-    v = 10
+    v = [10,]
     t = 342.9324
     p = [v∞, ω, λ]
-    @test TumorGrowth.bertalanffy_ode(v, p, t) ≈ -7log(5)*10
+    @test first(TumorGrowth.bertalanffy_ode(v, p, t)) ≈ -7log(5)*10
 end
 
 @testset "bertalanffy2_ode!" begin
