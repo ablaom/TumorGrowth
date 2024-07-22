@@ -27,6 +27,12 @@ volumes = [3, 6, 15]
     @test length(p) == 5
     keys(p) == (:v∞, :ω, :λ, :γ)
 
+    # exponential:
+    p = TumorGrowth.guess_parameters(times[1:2], exp.(times[1:2]), exponential)
+    @test length(p) == 2
+    @test p.v0 ≈ exp(times[1])
+    @test p.ω ≈ -1.0
+
     # fallback:
     @test isnothing(TumorGrowth.guess_parameters(times, volumes, "junk"))
 end
@@ -39,7 +45,7 @@ end
     @test scales.v∞ == 15.0
     @test scales.ω ≈ abs.(TumorGrowth.guess_parameters(times, volumes, gompertz).ω)
 
-    # one-dimensional TumorGrowth.
+    # one-dimensional TumorGrowth:
     s1 = TumorGrowth.scale_function(times, volumes, bertalanffy)
     scales = s1((v0=1.0, v∞=1.0, ω=1.0, λ=1.0))
     @test scales.v0 == 15.0
@@ -47,7 +53,7 @@ end
     @test scales.ω ≈ abs.(TumorGrowth.guess_parameters(times, volumes, bertalanffy).ω)
     @test scales.λ == 1.0
 
-    # bertalanffy2
+    # bertalanffy2:
     s1 = TumorGrowth.scale_function(times, volumes, bertalanffy2)
     p = guess_parameters(times, volumes, bertalanffy2)
     vol_scale = p.v∞
@@ -57,6 +63,12 @@ end
     @test scales.ω ≈ abs.(TumorGrowth.guess_parameters(times, volumes, bertalanffy2).ω)
     @test scales.λ == 1.0
     @test scales.γ == 1.0
+
+    # exponential:
+    s1 = TumorGrowth.scale_function(times[1:2], exp.(2*times[1:2]), exponential)
+    scales = s1((v0=1.0, ω=1.0))
+    @test scales.v0 == exp(2*times[1])
+    @test scales.ω ≈ 2.0/log(2)
 
     # fallback:
     @test TumorGrowth.scale_function(times, volumes, "junk") == identity
@@ -74,6 +86,9 @@ end
         p = merge(p, (; v∞ = -p.v∞))
         @test !h(p)
     end
+    h = TumorGrowth.constraint_function(exponential)
+    @test h((; v0=1, ω=Inf))
+    @test !h((; v0=-1, ω=Inf))
     h = TumorGrowth.constraint_function("junk")
     @test h("a;lsjfd")
 end
@@ -97,6 +112,10 @@ end
         bertalanffy(times, p) - bertalanffy2(times, merge(p, (; γ=0.0)); abstol, reltol)
     @test all(abs.(deviations) .< tolerance)
 end
+
+@testset "`exponential`" begin
+    @test exponential(times, (; v0, ω)) ≈ v0*exp.(-ω*(times .- times[1]))
+end 
 
 @testset "`Neural2` objects" begin
     rng = StableRNG(127)
