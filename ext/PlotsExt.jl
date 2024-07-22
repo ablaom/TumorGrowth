@@ -43,7 +43,7 @@ end
     end
     if model == bertalanffy2
         @series begin
-            label := "$model (aspirational)"
+            label := "$model (carrying capacity)"
             seriestype := :path
             linestyle := :dot
             xplot = range(times[1], times[end], length=200)
