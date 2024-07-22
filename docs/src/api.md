@@ -12,10 +12,10 @@ predicted by the model.
 
 If the implementation of `mymodel` requires numerically solving an ordinary differential
 equation, follow the example given for the `bertalanffy2` model, which appears
-[here](https://github.com/ablaom/TumorGrowth.jl/blob/dev/src/models/bertalanffy2.jl). In
+[here](https://github.com/ablaom/TumorGrowth.jl/blob/dev/src/models/bertalanffy2.jl). (In
 the TumorGrowth.jl repository, the model ODEs themselves are defined by functions ending
 in `_ode` or `_ode!` in a [separate
-file](https://github.com/ablaom/TumorGrowth.jl/blob/dev/src/odes.jl).
+file](https://github.com/ablaom/TumorGrowth.jl/blob/dev/src/odes.jl).)
 
 Additionally, one may want to overload some of functions listed below for the new model,
 especially if convergence during calibration is an issue.  For example, if the new model
