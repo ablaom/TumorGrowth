@@ -14,6 +14,7 @@ makedocs(;
                  "Calibration workflows" => "examples/03_calibration/notebook.md",
                  "Model battle" => "examples/04_model_battle/notebook.md",
              ],
+             "Adding new models" => "api.md",
              "Reference" => "reference.md",
              ],
          sitename="TumorGrowth.jl",

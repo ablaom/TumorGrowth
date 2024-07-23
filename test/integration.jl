@@ -19,9 +19,9 @@ models = [
     logistic,
     gompertz,
     bertalanffy,
-    ### after resolution of https://github.com/ablaom/TumorGrowth.jl/issues/18:
-    # bertalanffy_numerical,
+    bertalanffy_numerical,
     bertalanffy2,
+    exponential,
     n1,
     n2,
 ]

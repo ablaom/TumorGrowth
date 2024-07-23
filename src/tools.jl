@@ -1,16 +1,16 @@
-# """
-#     slope(xs, ys)
+"""
+    slope(xs, ys)
 
-# Return the slope of the line of least-squares best fit for ordinates `xs` and coordinates
-# `ys`.
+Return the slope of the line of least-squares best fit for ordinates `xs` and coordinates
+`ys`.
 
-# """
-# function slope(xs::AbstractArray{T}, ys) where T
-#     A = hcat(xs, ones(T, length(xs)))
-#     At = adjoint(A)
-#     m, c = (At*A) \ At*ys
-#     return m
-# end
+"""
+function slope(xs::AbstractArray{T}, ys) where T
+    A = hcat(xs, ones(T, length(xs)))
+    At = adjoint(A)
+    m, c = (At*A) \ At*ys
+    return m
+end
 
 """
     curvature(xs, ys)
