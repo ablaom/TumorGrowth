@@ -1,6 +1,6 @@
 """
 
-TumorGrowth.jl provides the following models for tumor growth: 
+TumorGrowth.jl provides the following models for tumor growth:
 
 | model                           | description                             | parameters, `p`       | analytic? |
 |:--------------------------------|:----------------------------------------|:----------------------|:----------|
@@ -51,16 +51,19 @@ module TumorGrowth
 
 import DifferentialEquations as DE
 import SciMLSensitivity as Sens
+import LeastSquaresOptim as LSO
+using Zygote
 import CSV
 import Tables
 using Optimisers
 using IterationControl
-using Random
 import Functors
 import Lux
 using UnPack
 using ComponentArrays
 using Statistics
+using Random
+
 
 include("plots.jl")
 include("patient_data.jl")

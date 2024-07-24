@@ -20,9 +20,16 @@ linecolor(::typeof(bertalanffy2)) = :black
 linecolor(::typeof(logistic)) = :black
 
 @recipe function f(c::TumorGrowth.CurveOptimisationProblem)
-    @unpack xs, ys, F, optimisation_problem = c
+    @unpack xs, ys, F, problem = c
     xplot = range(xs[1], xs[end], length=200)
-    yplot = F(xplot, optimisation_problem.x)
+    yplot = F(xplot, problem.x)
+    xplot, yplot
+end
+
+@recipe function f(c::TumorGrowth.CurveOptimisationProblem)
+    @unpack xs, ys, F, problem = c
+    xplot = range(xs[1], xs[end], length=200)
+    yplot = F(xplot, problem.x)
     xplot, yplot
 end
 

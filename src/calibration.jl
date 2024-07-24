@@ -121,7 +121,7 @@ plot!(problem, label="prediction")
   parameters are otherwise unconstrained.
 
 - `frozen`: a named tuple, such as `(; v0=nothing, λ=1/2)`; indicating parameters to be
-  frozen at specified values during optimization; a `nothing` value means freeze at
+  frozen at specified values during optimisation; a `nothing` value means freeze at
   initial value.
 
 - `learning_rate=0.0001`: learning rate for Adam gradient descent optimiser

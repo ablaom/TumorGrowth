@@ -39,7 +39,7 @@ struct WeightedL2Loss{T}
     weights::Vector{T}
     function WeightedL2Loss(times, h)
         h > 0 || error("Need positive half life. Set to `Inf` for no decay. ")
-        h == Inf && return new{Nothing}([nothing,])
+        h == Inf && return new{Nothing}(Nothing[])
         t_end = times[end]
         weights = map(times) do t
             exp(log(2)*(t - t_end)/h)
@@ -62,8 +62,8 @@ grab(x::Nothing, y) = y
 
 *Private method.*
 
-Return a new tuple by replacing any `nothing` values with the corresponding value in the
-`from` tuple, whenever a corresponding key exists, and otherwise ignore.
+Return a new named tuple by replacing any `nothing` values with the corresponding value in
+the `from` named tuple, whenever a corresponding key exists, and otherwise ignore.
 
 ```julia
 julia> recover((x=1, y=nothing, z=3, w=nothing), (x=10, y=2, k=7))
@@ -94,3 +94,19 @@ function merge(x::ComponentArray, y)
     p, reconstruct = TumorGrowth.functor(x)
     return merge(p, y) |> reconstruct
 end
+
+function delete(x::NamedTuple, kys)
+    keep = filter(keys(x)) do k
+        !(k in kys)
+    end
+    values = map(keep) do k
+        getproperty(x, k)
+    end
+    NamedTuple{keep}(values)
+end
+
+function delete(x, kys)
+    p, _ = TumorGrowth.functor(x)
+    delete(p, kys)
+end
+

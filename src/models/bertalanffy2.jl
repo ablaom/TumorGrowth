@@ -53,7 +53,7 @@ function bertalanffy2(
     )
 
     times == sort(times) || throw(ERR_UNORDERED_TIMES)
-
+ 
     @unpack v0, v∞, ω, λ, γ = p
 
     # We rescale volumes by `v∞` before sending to solver. It is tempting to perform a
