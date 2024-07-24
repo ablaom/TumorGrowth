@@ -26,13 +26,6 @@ linecolor(::typeof(logistic)) = :black
     xplot, yplot
 end
 
-@recipe function f(c::TumorGrowth.CurveOptimisationProblem)
-    @unpack xs, ys, F, problem = c
-    xplot = range(xs[1], xs[end], length=200)
-    yplot = F(xplot, problem.x)
-    xplot, yplot
-end
-
 @recipe function f(problem::TumorGrowth.CalibrationProblem)
     @unpack volumes, times, model, curve_optimisation_problem = problem
     p = solution(problem)
