@@ -160,7 +160,6 @@ function errors(
     plot,
     flag_out_of_bounds,
     )
-
     times = etimes[1:end-holdouts]
     volumes = evolumes[1:end-holdouts]
 

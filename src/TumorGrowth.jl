@@ -52,6 +52,8 @@ module TumorGrowth
 import DifferentialEquations as DE
 import SciMLSensitivity as Sens
 import LeastSquaresOptim as LSO
+import LeastSquaresOptim: LevenbergMarquardt, Dogleg
+
 using Zygote
 import CSV
 import Tables
@@ -108,7 +110,10 @@ export patient_data,
     pretty,
     solution,
     parameters,
-    errors
+    errors,
+    Dogleg,
+    LevenbergMarquardt,
+    LeastSquaresOptim
 
 # for julia < 1.9
 if !isdefined(Base, :get_extension)

@@ -33,7 +33,6 @@ function Base.show(io::IO, problem::CalibrationProblem)
     return
 end
 
-
 """
         CalibrationProblem(times, volumes, model; learning_rate=0.0001, options...)
 
@@ -157,10 +156,18 @@ function CalibrationProblem(
     frozen = NamedTuple(),
     half_life = Inf,
     penalty = 0.0,
-    learning_rate=0.0001,
+    learning_rate = nothing,
     optimiser=Optimisers.Adam(learning_rate),
     ode_options...,
     )
+
+    if isnothing(learning_rate)
+        if optimiser isa GaussNewtonOptimiser
+            learning_rate = 0.0
+        else
+            learning_rate = 0.0001
+        end
+    end
 
     times = collect(times)
 

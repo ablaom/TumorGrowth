@@ -194,6 +194,8 @@ solution(gnproblem::GaussNewtonProblem) = _unwrap(gnproblem.reconstruct(gnproble
 # least-squares optimiser (`problem`) will be an instance of
 # `LevenbergMaquardt`).
 
+const GaussNewtonOptimiser = Union{LSO.LevenbergMarquardt,LSO.Dogleg}
+
 mutable struct CurveOptimisationProblem{T<:Number,FF,P}
     xs::AbstractVector{T}
     ys::AbstractVector{T}
@@ -220,7 +222,7 @@ mutable struct CurveOptimisationProblem{T<:Number,FF,P}
             "Abscissae `xs` and ordinates `ys` must be equal in number. "
         ))
 
-        if optimiser isa Union{LSO.LevenbergMarquardt,LSO.Dogleg}
+        if optimiser isa GaussNewtonOptimiser
             learning_rate == 0 ||
                 @warn "Optimiser is `$optimiser`, so ignoring `learning_rate`. "
             loss isa TumorGrowth.WeightedL2Loss{Nothing} ||

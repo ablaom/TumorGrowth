@@ -2,6 +2,7 @@ using Test
 using TumorGrowth
 import StableRNGs.StableRNG
 using Lux
+using Plots
 
 # generate some data:
 data = patient_data();
@@ -29,5 +30,12 @@ models = [
 holdouts = 2
 n_iterations = fill(2, length(models))
 comparison = compare(times, volumes, models; holdouts, n_iterations)
+
+# smoke test:
+plot(comparison)
+
+n_iterations = fill(2, length(models))
+calibration_options = fill((; optimiser=LevenbergMarquardt()), length(models))
+comparison = compare(times, volumes, models; holdouts, n_iterations, calibration_options)
 
 true
