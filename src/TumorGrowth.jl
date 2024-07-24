@@ -53,7 +53,7 @@ import DifferentialEquations as DE
 import SciMLSensitivity as Sens
 import LeastSquaresOptim as LSO
 import LeastSquaresOptim: LevenbergMarquardt, Dogleg
-
+using Suppressor
 using Zygote
 import CSV
 import Tables
@@ -63,6 +63,7 @@ import Functors
 import Lux
 using UnPack
 using ComponentArrays
+
 using Statistics
 using Random
 

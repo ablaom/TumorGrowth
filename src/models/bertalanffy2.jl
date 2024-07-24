@@ -82,7 +82,7 @@ function guess_parameters(times, volumes, ::typeof(bertalanffy2))
     )
 
     try
-        outcomes = solve!(problem, Step(1), InvalidValue(), NumberLimit(1000))
+        outcomes = @suppress solve!(problem, Step(1), InvalidValue(), NumberLimit(1000))
         outcomes[2][2].done && return fallback # out of bounds
         return merge(solution(problem), (; γ=κ))
     catch
