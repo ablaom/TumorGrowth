@@ -123,15 +123,16 @@ plot!(problem, label="prediction")
   frozen at specified values during optimisation; a `nothing` value means freeze at
   initial value.
 
-- `learning_rate=0.0001`: learning rate for Adam gradient descent optimiser
+- `learning_rate=0.0001`: learning rate for default Adam gradient descent optimiser;
+  ignored otherwise
 
 - `optimiser=Optimisers.Adam(learning_rate)`: optimiser; must be from Optimisers.jl.
 
 - `scale`: a scaling function with the property that `p = scale(q)` has a value of the
   same order of magnitude for the model parameters being optimised, whenever `q` has the
-  same form as a model parameter `p` but with all values equal to one. Scaling ensures
-  gradient descent learns all components of `p` at a similar rate. If unspecified, scaling
-  is inferred for built-in models, and uniform otherwise.
+  same form as a model parameter `p` but with all values equal to one. Scaling can help
+  components of `p` converge at a similar rate. If unspecified, scaling is inferred for
+  built-in models, and is uniform otherwise.
 
 - `half_life=Inf`: set to a real positive number to replace the sum of squares loss with a
   weighted version; weights decay in reverse time with the specified `half_life`
