@@ -74,23 +74,26 @@ end
     @test TumorGrowth.scale_function(times, volumes, "junk") == identity
 end
 
-@testset "constraint function" begin
+@testset "lower and upper" begin
     for model in [gompertz, bertalanffy, bertalanffy2]
-        h = TumorGrowth.constraint_function(model)
+        lower = TumorGrowth.lower(model)
+        upper = TumorGrowth.upper(model)
         p = TumorGrowth.guess_parameters(times, volumes, model)
-        @test h(p)
+        @test TumorGrowth.satisfies_constraints(p, lower, upper)
         p = merge(p, (; v∞ = -p.v∞))
-        @test !h(p)
+        @test !TumorGrowth.satisfies_constraints(p, lower, upper)
         p = merge(p, (; v∞ = -p.v∞, v0 = -p.v0))
-        @test !h(p)
+        @test !TumorGrowth.satisfies_constraints(p, lower, upper)
         p = merge(p, (; v∞ = -p.v∞))
-        @test !h(p)
+        @test !TumorGrowth.satisfies_constraints(p, lower, upper)
     end
-    h = TumorGrowth.constraint_function(exponential)
-    @test h((; v0=1, ω=Inf))
-    @test !h((; v0=-1, ω=Inf))
-    h = TumorGrowth.constraint_function("junk")
-    @test h("a;lsjfd")
+    model = exponential
+    lower = TumorGrowth.lower(model)
+    upper = TumorGrowth.upper(model)
+    @test TumorGrowth.satisfies_constraints((; v0=1, ω=10), lower, upper)
+    @test !TumorGrowth.satisfies_constraints((; v0=-1, ω=100), lower, upper)
+    @test isempty(TumorGrowth.lower("junk"))
+    @test isempty(TumorGrowth.upper("junk"))
 end
 
 tolerance = eps()*10^8 # 2.2e-8
@@ -100,6 +103,16 @@ v0, v∞, ω, λ = 24.2, 48.2, 0.113, 1.49
 p = (; v0, v∞, ω, λ)
 abstol = 1e-8
 reltol = 1e-8
+
+@testset "bertalanffy_analytic_solution NaN logic" begin
+    f = TumorGrowth.bertalanffy_analytic_solution
+    @test f(42, 0, v∞, ω, λ) == 0
+    @test f(42, v0, 0, ω, λ) |> isnan
+    @test f(42, -v0, v∞, ω, λ) |> isnan
+    @test f(42, v0, -v∞, ω, λ) |> isnan
+    @test f(42, v0, v∞, ω, 0) ≈ (v0/v∞)^exp(-ω*42)*v∞
+    @test f(42, v0, v∞, -2, λ) |> isnan
+end
 
 @testset "`bertalanffy_numerical` and `bertalanffy` agree" begin
     deviations =
@@ -115,7 +128,7 @@ end
 
 @testset "`exponential`" begin
     @test exponential(times, (; v0, ω)) ≈ v0*exp.(-ω*(times .- times[1]))
-end 
+end
 
 @testset "`Neural2` objects" begin
     rng = StableRNG(127)

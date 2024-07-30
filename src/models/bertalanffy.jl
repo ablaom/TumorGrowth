@@ -1,7 +1,12 @@
-bertalanffy_analytic_solution(t, v0, v∞, ω, λ) =
-    λ == 0 ?
-    (v0/v∞)^exp(-ω*t)*v∞ :
-    (1 + ((v0/v∞)^λ - 1)*exp(-ω*t))^(1/λ)*v∞
+function bertalanffy_analytic_solution(t, v0, v∞, ω, λ)
+    v0 == 0 && return 0
+    v∞ == 0 && return NaN
+    sign(v0)*sign(v∞) == -1 && return NaN
+    λ == 0 && return (v0/v∞)^exp(-ω*t)*v∞
+    base = 1 + ((v0/v∞)^λ - 1)*exp(-ω*t)
+    base < 0 && return NaN
+    base^(1/λ)*v∞
+end
 
 """
     bertalanffy(times, p)
@@ -38,7 +43,7 @@ function scale_function(times, volumes, model::typeof(bertalanffy))
     return p -> (v0=volume_scale*p.v0, v∞=volume_scale*p.v∞, ω=p.ω/time_scale, λ=p.λ)
 end
 
-constraint_function(model::typeof(bertalanffy)) =
-    constraint_function(classical_bertalanffy)
+lower(model::typeof(bertalanffy)) = lower(classical_bertalanffy)
+upper(model::typeof(bertalanffy)) = upper(classical_bertalanffy)
 
 n_iterations(::typeof(bertalanffy)) = 20000

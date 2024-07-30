@@ -32,4 +32,4 @@ function scale_function(times, volumes, model::typeof(classical_bertalanffy))
     return p -> (v0=volume_scale*p.v0, v∞=volume_scale*p.v∞, ω=p.ω/time_scale)
 end
 
-constraint_function(model::typeof(classical_bertalanffy)) = p -> p.v0 > 0 && p.v∞ > 0
+lower(model::typeof(classical_bertalanffy)) = (v0=0, v∞=0)

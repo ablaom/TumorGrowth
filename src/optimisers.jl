@@ -13,50 +13,52 @@ const ERR_OUT_OF_BOUNDS = ArgumentError( "Initial candidate solution is out of b
 # For the moment we are restricting to gradient descent optimisers, which we get from
 # Optimisers.jl.
 
-mutable struct OptimisationProblem{F,X,R,G,O,XF,SC,S}
+mutable struct OptimisationProblem{F,X,L,U,R,O,XF,SC,S}
     f::F # objective function with values of type `T`
     x::X # candidate solution
     reconstruct::R
-    g::G # `g(x) == false` means `x` out of bounds
+    lower # lower bound constraint on x
+    upper # upper bound constraint on x
     optimiser::O
     frozen::XF  # frozen part of candidate solution
     scale::SC # `scale(x)` is `x` with each component multiplied by
               # a scaling factor
     inbounds::Bool
     state::S
-end
-function OptimisationProblem(
-    f,
-    x_user;
-    g = x-> true,
-    learning_rate=0.01,
-    optimiser=Optimisers.Adam(learning_rate),
-    frozen=NamedTuple(),
-    scale=identity,
-    )
+    function OptimisationProblem(
+        f::F,
+        x_user::X,
+        lower::L,
+        upper::U,
+        optimiser::O,
+        frozen::XF,
+        scale::SC,
+        ) where {F,X,L,U,O,XF,SC}
 
-    x = deepcopy(x_user)
-    _, reconstruct = TumorGrowth.functor(x)
-    g(x) || throw(ERR_OUT_OF_BOUNDS)
-    state = Optimisers.setup(optimiser, x)
-    return OptimisationProblem(
-        f,
-        x,
-        reconstruct,
-        g,
-        optimiser,
-        frozen,
-        scale,
-        true,
-        state,
-    )
+        TumorGrowth.satisfies_constraints(x_user, lower, upper) || throw(ERR_OUT_OF_BOUNDS)
+        x = deepcopy(x_user)
+        _, reconstruct = TumorGrowth.functor(x)
+        state = Optimisers.setup(optimiser, x)
+        return new{F,X,L,U,typeof(reconstruct),O,XF,SC,typeof(state)}(
+            f,
+            x,
+            reconstruct,
+            lower,
+            upper,
+            optimiser,
+            frozen,
+            scale,
+            true,
+            state,
+        )
+    end
 end
 
 function Base.show(io::IO, problem::OptimisationProblem)
     scaling = problem.scale == identity ? "no" : "yes"
     print(io, "OptimisationProblem: \n  "*
         "optimiser: $(problem.optimiser)\n  "*
-        "type of solutions: $(typeof(problem.x))\n  "*
+        "parameters: $keys(problem.x)\n  "*
         "frozen: $(problem.frozen)\n  "*
         "scaling? $scaling"
           )
@@ -64,26 +66,19 @@ function Base.show(io::IO, problem::OptimisationProblem)
 end
 
 function IterationControl.train!(problem::OptimisationProblem, n)
-    @unpack f, x, reconstruct, g, optimiser, frozen, scale, inbounds, state = problem
-    frozen_nt, _ = TumorGrowth.functor(frozen)
+    @unpack f, x, reconstruct, lower, upper, optimiser, frozen, scale, inbounds, state = problem
+    frozen_named_tuple, _ = TumorGrowth.functor(frozen)
+    s(x) = reconstruct(scale(x))
     for _ in 1:n
+        x = problem.x
         ∇f = Sens.Zygote.gradient(f, x) |> only
-        ∇f = scale(scale(∇f))
-        state, x = Optimisers.update(state, x, ∇f)
-        x_nt, _ = TumorGrowth.functor(x)
-        x_candidate = merge(x_nt, frozen_nt) |> reconstruct
-        if g(x_candidate)
-            problem.x = x_candidate
-            problem.state = state
-        else
-            problem.inbounds=false
-            @warn "Solution out of bounds; solution reverted "*
-                "to last in-bounds value. Perhaps try a "*
-                "smaller `learning_rate`, larger `penalty`, "*
-                "or freeze some components. Out of bounds value:"*
-                "\n$x"
-            break
-        end
+        ∇f = s(s(∇f))
+        state, x_candidate = Optimisers.update(state, x, ∇f)
+        x_named_tuple, _ = TumorGrowth.functor(x_candidate)
+        x_candidate = merge(x_named_tuple, frozen_named_tuple) |> reconstruct
+        TumorGrowth.force_constraints!(x_candidate, x, lower, upper)
+        problem.x = x_candidate
+        problem.state = state
     end
     problem.x
 end
@@ -97,26 +92,44 @@ solution(problem::OptimisationProblem) = _unwrap(problem.x)
 
 # # GAUSS-NEWTON VARIATIONS OF LEAST SQUARES OPTIMIZATION
 
-# The following is a wrapper for `LSO.LeastSquaresProblem`, where `LSO=LeastSquaresOptim`.
+# We define a wrapper for `LSO.LeastSquaresProblem`, where `LSO=LeastSquaresOptim`.
 
 # In the wrapper, `problem::LSO.LeastSquaresProblem` is assumed to be formulated for an
 # objective function of `xfree`, which excludes frozen parameters. We need `reconstruct`
 # to recover a full parameter `x` with the frozen entries reinstated (as a
 # `ComponentArray`).
 
-mutable struct GaussNewtonProblem{G,P,O}
-    g::G # `g(x) == false` means `x` out of bounds
-    reconstruct # `reconstruct(xfree)` restores the frozen entries
-    problem::P
-    optimiser::O  # has type `LSO.Dogleg` or `LSO.LevenbergMarquardt`
+
+const GaussNewtonOptimiser = Union{LSO.LevenbergMarquardt,LSO.Dogleg}
+
+mutable struct GaussNewtonProblem{
+    P <: LSO.LeastSquaresProblem,
+    L,
+    U,
+    O <: GaussNewtonOptimiser,
+    R,
+    }
+    problem::P  # LSO.LeastSquaresProblem whose `x` field excludes frozens
+    lower::L
+    upper::U
+    Δ::Float64
+    optimiser::O   # has type `LSO.Dogleg` or `LSO.LevenbergMarquardt`
+    reconstruct::R # `reconstruct(xfree)` restores the frozen entries
     loss::Float64
     function GaussNewtonProblem(
-        g::G,
-        reconstruct,
         problem::P,
+        lower,
+        upper,
+        Δ,
         optimiser::O,
-        ) where {G,P,O}
-        new{G,P,O}(g, reconstruct, problem, optimiser, Inf)
+        reconstruct::R,
+        ) where {P,O,R}
+
+        # need to extend named tuple bounds to full-blown component arrays, matching the
+        # structure of `problem.x`, unless empty:
+        l = isempty(lower) ? Float64[] : TumorGrowth.fill_gaps(lower, problem.x, -Inf)
+        u = isempty(upper) ? Float64[] : TumorGrwoth.fill_gaps(upper, problem.x, Inf)
+        new{P,typeof(l),typeof(u),O,R}(problem, l, u, Δ, optimiser, reconstruct, Inf)
     end
 end
 
@@ -132,42 +145,21 @@ end
 function Base.show(io::IO, problem::GaussNewtonProblem)
     print(io, "GaussNewtonProblem: \n  "*
         "optimiser: $(problem.optimiser)\n  "*
-        "type of solutions: $(typeof(problem.x))"
+        "parameters: $(keys(problem.x))"
           )
     return
 end
 
 function IterationControl.train!(gnproblem::GaussNewtonProblem, n)
     # `loss` is ignored here:
-    @unpack g, reconstruct, problem, optimiser, loss = gnproblem
-    if n == 0
-        x_previous = problem.x
-        solution = LSO.optimize!(problem, optimiser)
-        if !g(reconstruct(problem.x))
-            gnproblem.inbounds=false
-            @warn "Solution out of bounds; solution reverted "*
-                "to initial value. Try specifying a specific number of iterations. "
-            problem.x = x_previous
-            gnproblem.loss = Inf
-        else
-            gnproblem.loss = solution.ssr
-        end
-        return problem.x
-    end
+    @unpack problem, lower, upper, Δ, optimiser, reconstruct, loss = gnproblem
 
-    for _ in 1:n
-        x_previous = problem.x
-        solution = LSO.optimize!(problem, optimiser, iterations=1)
-        if !g(reconstruct(problem.x))
-            gnproblem.inbounds=false
-            @warn "Solution out of bounds; solution reverted "*
-                "to last inbounds value. "
-            problem.x = x_previous
-            gnproblem.loss = Inf
-            break
-        end
-        gnproblem.loss = solution.ssr
+    options = (; lower, upper, Δ)
+    if n > 0
+        options = merge(options, (; iterations=n))
     end
+    solution = LSO.optimize!(problem, optimiser; options...)
+    gnproblem.loss = solution.ssr
     return problem.x
 end
 IterationControl.train!(gnproblem::GaussNewtonProblem) =
@@ -194,8 +186,6 @@ solution(gnproblem::GaussNewtonProblem) = _unwrap(gnproblem.reconstruct(gnproble
 # least-squares optimiser (`problem`) will be an instance of
 # `LevenbergMaquardt`).
 
-const GaussNewtonOptimiser = Union{LSO.LevenbergMarquardt,LSO.Dogleg}
-
 mutable struct CurveOptimisationProblem{T<:Number,FF,P}
     xs::AbstractVector{T}
     ys::AbstractVector{T}
@@ -210,8 +200,10 @@ mutable struct CurveOptimisationProblem{T<:Number,FF,P}
         learning_rate=0.0,                   # ignored in GaussNewton case
         # Next argument Optimisers.jl optimiser or has type LSO.Dogleg or
         # LSO.LevenbergMarquardt:
+        lower=(;),
+        upper=(;),
         optimiser=Optimisers.Adam(learning_rate),
-        g = _->true,
+        Δ = 10.0,
         frozen=NamedTuple(),
         scale=identity, # ignored in GaussNewton case
         kwargs...,
@@ -241,21 +233,31 @@ mutable struct CurveOptimisationProblem{T<:Number,FF,P}
             # in-place version of Jacobian of that function:
             g!(J, cfree) = copy!(
                 J,
-                Zygote.jacobian(h, cfree) |> first,
+                Sens.Zygote.jacobian(h, cfree) |> first,
             )
 
             least_squares_problem =
                 LSO.LeastSquaresProblem(; x = cfree, f!, g!, output_length = length(xs))
 
             problem = GaussNewtonProblem(
-                g,
-                reconstruct,
                 least_squares_problem,
+                lower,
+                upper,
+                Δ,
                 optimiser,
+                reconstruct,
             )
         else
             f(p) = loss(F(xs, p; kwargs...), ys, p)
-            problem = OptimisationProblem(f, p; learning_rate, optimiser, g, frozen, scale)
+            problem = OptimisationProblem(
+                f,
+                p,
+                lower,
+                upper,
+                optimiser,
+                frozen,
+                scale,
+            )
         end
 
         return new{T,FF,typeof(problem)}(xs, ys, F, problem)
@@ -273,13 +275,20 @@ function Base.show(io::IO, problem::CurveOptimisationProblem{T,FF,P}) where {T,F
     print(
         io,
         "CurveOptimisationProblem: \n  "*
-        "algorithm: $algorithm",
+            "algorithm: $algorithm\n  "*
+            "parameters: $(keys(solution(problem)))"
         )
 end
+
+const ERR_ZERO_ITERATIONS = ArgumentError(
+    "You must specify a positive number of iterations"
+)
 
 IterationControl.loss(c::CurveOptimisationProblem) =
     IterationControl.loss(c.problem)
 function IterationControl.train!(c::CurveOptimisationProblem, n)
+    c.problem isa OptimisationProblem && n == 0 &&
+        throw(ERR_ZERO_ITERATIONS)
     problem = c.problem
     solution = IterationControl.train!(problem, n)
     c.problem = problem
@@ -297,6 +306,9 @@ solution(c::CurveOptimisationProblem) =
 Solve a calibration `problem`, as constructed with [`CalibrationProblem`](@ref). The
 calibrated parameters are then returned by `solution(problem)`.
 
+If using a Gauss-Newton optimiser (`LevenbergMarquardt` or `Dogleg`) specify `n=0` to
+choose `n` automatically.
+
 ---
 
     solve!(problem, controls...)
@@ -305,8 +317,11 @@ Solve a calibration `problem` using one or more iteration `controls`, from the p
 IterationControls.jl. See the "Extended help" section of [`CalibrationProblem`](@ref) for
 examples.
 
+Not recommended for Gauss-Newton optimisers (`LevenbergMarquardt` or `Dogleg`).
+
 """
 solve!(args...; kwargs...) = IterationControl.train!(args...; kwargs...)
+solve!(problem::CurveOptimisationProblem) = IterationControl.train!(problem, 0)
 
 """
     loss(problem)

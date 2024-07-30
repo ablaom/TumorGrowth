@@ -18,4 +18,15 @@ guess_parameters(times, volumes, ::typeof(logistic)) =
 scale_function(times, volumes, model::typeof(logistic)) =
     scale_function(times, volumes, classical_bertalanffy)
 
-constraint_function(model::typeof(logistic)) = constraint_function(classical_bertalanffy)
+lower(model::typeof(logistic)) = lower(classical_bertalanffy)
+upper(model::typeof(logistic)) = upper(classical_bertalanffy)
+
+
+
+
+
+
+
+
+
+

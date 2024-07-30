@@ -11,9 +11,6 @@ parameters are explained below.
 
 # Keyword options
 
-- `capacity=false`: Set to `true` to return the latent "carrying capacity" variable, in
-  addition to the actual volumes.
-
 - `solve_kwargs`: optional keyword arguments for the ODE solver,
   `DifferentialEquations.solve`, from DifferentialEquations.jl.
 
@@ -64,9 +61,13 @@ function bertalanffy2(
     p = [ω, λ, γ]
     problem = DE.ODEProblem(bertalanffy2_ode!, q0, tspan, p)
     solution = DE.solve(problem, DE.Tsit5(); saveat, reltol, sensealg, kwargs...)
+
     # return to original scale:
-    capacity || return v∞ .* first.(solution.u)
-    return v∞ .* solution.u
+    volumes = v∞ .* first.(solution.u)
+
+    # if the solution became unstable, we need to extend with NaN's:
+    TumorGrowth.is_okay(solution) && return volumes
+    return append!(volumes, fill(NaN, length(times) - length(volumes)))
 end
 
 function guess_parameters(times, volumes, ::typeof(bertalanffy2))
@@ -98,4 +99,5 @@ function scale_function(times, volumes, model::typeof(bertalanffy2))
     p -> (v0=volume_scale*p.v0, v∞=volume_scale*p.v∞, ω=p.ω/time_scale, λ=p.λ, γ=p.γ)
 end
 
-constraint_function(::typeof(bertalanffy2)) = constraint_function(classical_bertalanffy)
+lower(::typeof(bertalanffy2)) = lower(classical_bertalanffy)
+upper(::typeof(bertalanffy2)) = upper(classical_bertalanffy)

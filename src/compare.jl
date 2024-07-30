@@ -24,12 +24,27 @@ struct ModelComparison{T<:Real, MTuple<:Tuple, OTuple<:Tuple, N, M, PTuple<:Tupl
         volumes::Vector{T},
         models;
         holdouts=3,
-        calibration_options = options.(models),
-        n_iterations = n_iterations.(models),
+        learning_rate=nothing,
+        optimiser=nothing,
+        calibration_options=nothing,
+        n_iterations=nothing,
         metric=mae,
         plot=false,
         flag_out_of_bounds=false,
         ) where T<:Real
+
+        if isnothing(learning_rate)
+            if optimiser isa GaussNewtonOptimiser
+                learning_rate = 0.0
+            else
+                learning_rate = 0.0001
+            end
+        end
+        isnothing(optimiser) && (optimiser = Optimisers.Adam(learning_rate))
+        isnothing(calibration_options) &&
+            (calibration_options = TumorGrowth.options.(models, Ref(optimiser)))
+        isnothing(n_iterations) &&
+            (n_iterations = TumorGrowth.n_iterations.(models, Ref(optimiser)))
 
         length(models) == length(calibration_options) == length(n_iterations) ||
             throw(ERR_MISMATCH)
@@ -41,10 +56,10 @@ struct ModelComparison{T<:Real, MTuple<:Tuple, OTuple<:Tuple, N, M, PTuple<:Tupl
                 volumes,
                 _models,
                 holdouts,
+                optimiser,
                 _options,
                 n_iterations,
                 plot,
-                flag_out_of_bounds,
             ) # defined below
         MTuple = typeof(_models)
         OTuple = typeof(_options)
@@ -99,7 +114,7 @@ julia> gompertz(times, p)
 When a model parameter becomes out of bounds, calibration stops early and the last
 in-bounds value is reported.
 
-# Visualing comparisons
+# Visualising comparisons
 
 ```julia
 using Plots
@@ -115,16 +130,25 @@ plot(comparison, title="A comparison of two models")
   example, any regression measure from StatisticalMeasures.jl can be used here. The
   built-in fallback is mean absolute error.
 
+- `optimiser=Optimisers.Adam(learning_rate)`: optimiser. There are two kinds:
+
+  - A gradient descent optimiser: this must be from Optimisers.jl or implement the same
+    API.
+
+  - A Gauss-Newton optimiser: either `LevenbergMarquardt()`, `Dogleg()`, which may be
+    provided an optional solver argument; see LeastSquaresOptim.jl for details.
+
 - `n_iterations=TumorGrowth.n_iterations.(models)`: a vector of iteration counts for the
   calibration of `models`
 
-- `calibration_options=TumorGrowth.options.(models)`: a vector of named tuples providing
-  the keyword arguments for `CalibrationProblem`s - one for each model. See
-  [`CalibrationProblem`](@ref) for details.
-
-- `flag_out_of_bounds=false`: set to `true` to report `NaN` as the error for a model whose
-  parameter became out of bounds during calibration. Otherwise, the error for the last
-  in-bounds parameter is reported.
+- `calibration_options`: a vector of named tuples providing keyword arguments for
+  `CalibrationProblem`s - one for each model. Possible keywords are: `p0`, `lower`,
+  `upper`, `frozen` (empty by default), `learning_rate`, `Δ`, `scale`, `half_life` (`Inf`
+  by default), `penalty`, and splatted `ode_options`; see [`CalibrationProblem`](@ref) for
+  details. If not specified, default values are inferred using the following methods:
+  [`TumorGrowth.guess_parameters`](@ref), [`TumorGrowth.lower`](@ref),
+  [`TumorGrowth.upper`](@ref), [`TumorGrowth.scale`](@ref), [`TumorGrowth.options`](@ref)
+  (`learning_rate`, `penalty`, `Δ`).
 
 See also [`errors`](@ref), [`parameters`](@ref).
 
@@ -141,24 +165,23 @@ calls to [`compare`](@ref).
 errors(comparison::ModelComparison) = comparison.errors
 
 """
-    errors(comparison)
+    parameters(comparison)
 
-Extract the the vector of errors from a `ModelComparison` object, as returned by
+Extract the the vector of parameters from a `ModelComparison` object, as returned by
 calls to [`compare`](@ref).
 
 """
 parameters(comparison::ModelComparison) = comparison.parameters
-
 
 function errors(
     etimes,
     evolumes,
     models,
     holdouts,
+    optimiser,
     options,
     n_iterations,
     plot,
-    flag_out_of_bounds,
     )
     times = etimes[1:end-holdouts]
     volumes = evolumes[1:end-holdouts]
@@ -167,21 +190,22 @@ function errors(
     error_param_pairs = map(models) do model
         i += 1
         n_iter = n_iterations[i]
-        problem = CalibrationProblem(times, volumes, model; options[i]...)
-        controls = Any[Step(1), InvalidValue(), NumberLimit(n_iter)]
+        step =
+            optimiser isa GaussNewtonOptimiser ? Step(n_iter) : Step(1)
+        number_limit =
+            optimiser isa GaussNewtonOptimiser ? NumberLimit(1) : NumberLimit(n_iter)
+        predicate =
+            optimiser isa GaussNewtonOptimiser ? 1 : div(n_iter, 50)
+        problem = CalibrationProblem(times, volumes, model; optimiser, options[i]...)
+        controls = Any[step, InvalidValue(), number_limit]
         plot && push!(controls, IterationControl.skip(
-            Callback(pr-> (TumorGrowth.plot(pr); TumorGrowth.gui())),
-            predicate=div(n_iter, 50),
+            Callback(pr-> (TumorGrowth.plot(pr); TumorGrowth.gui()));
+            predicate,
         ))
         outcomes = solve!(problem, controls...)
-        out_of_bounds = outcomes[2][2].done
         p = solution(problem)
-        if out_of_bounds && flag_out_of_bounds
-            error = NaN
-        else
-            v̂ = model(etimes, p)
-            error = mae(v̂[end-holdouts+1:end], evolumes[end-holdouts+1:end])
-        end
+        v̂ = model(etimes, p)
+        error = mae(v̂[end-holdouts+1:end], evolumes[end-holdouts+1:end])
         (error, p)
     end
 

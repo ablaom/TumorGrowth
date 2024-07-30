@@ -23,7 +23,6 @@ mutable struct CalibrationProblem{T,M,C}
     curve_optimisation_problem::C
 end
 
-
 function Base.show(io::IO, problem::CalibrationProblem)
     p = pretty(solution(problem))
     print(io, "CalibrationProblem: \n  "*
@@ -100,6 +99,13 @@ julia> loss(problem)
 
 See [IterationControl.jl](https://github.com/JuliaAI/IterationControl.jl) for all options.
 
+!!! note
+
+    Controlled iteration as above is not recommended if you specify
+    `optimiser=LevenbergMarquardt()` or `optimiser=Dogleg()` because the internal state
+    of these optimisers is reset at every `Step`. Instead, to arrange automatic stopping,
+    use `solve!(problem, 0)`.
+
 # Visualizing results
 
 ```julia
@@ -112,21 +118,30 @@ plot!(problem, label="prediction")
 
 - `p0`: initial value of the model parameters; inferred by default for built-in models
 
-- `g=(p-> true)`: constraint function: If `g(p) == false` for some parameter `p`, then a
-  warning is given and `solution(problem)` is frozen at the last constrained value of `p`;
-  use `solve!(problem, Step(1), InvalidValue(), ...)` to ensure early stopping (which
-  works because `IterationControl.loss(problem)` will return `Inf` in that case). If
-  unspecified, the constraint function is inferred in the case of built-in models and
-  parameters are otherwise unconstrained.
+- `lower`: named tuple indicating lower bounds on components of the model parameter
+  `p`. For example, if `lower=(; v0=0.1)`, then this introduces the constraint `p.v0 <
+  0.1`. The model-specific default value is `TumorGrowth.lower(model)`.
+
+- `upper`: named tuple indicating upper bounds on components of the model parameter
+  `p`. For example, if `upper=(; v0=100)`, then this introduces the constraint `p.v0 <
+  100`. The model-specific default value is `TumorGrowth.upper(model)`.
 
 - `frozen`: a named tuple, such as `(; v0=nothing, λ=1/2)`; indicating parameters to be
   frozen at specified values during optimisation; a `nothing` value means freeze at
   initial value.
 
-- `learning_rate=0.0001`: learning rate for default Adam gradient descent optimiser;
-  ignored otherwise
+- `learning_rate=0.0001`: learning rate for the default Adam gradient descent optimiser;
+  ignored otherwise.
 
-- `optimiser=Optimisers.Adam(learning_rate)`: optimiser; must be from Optimisers.jl.
+- `Δ > 0` (or `delta`): initial trust region radius; ignored unless `optimiser isa
+  LevenbergMaquardt` (default is `10.0`) or `optimiser isa Dogleg` (default is `1.0`).
+
+- `optimiser=Optimisers.Adam(learning_rate)`: optimisation algorithm. There are two kinds:
+
+  - A gradient descent optimiser: This must be from Optimisers.jl or implement the same
+    API.
+
+  - A Gauss-Newton optimiser: Either `LevenbergMarquardt()`, `Dogleg()`.
 
 - `scale`: a scaling function with the property that `p = scale(q)` has a value of the
   same order of magnitude for the model parameters being optimised, whenever `q` has the
@@ -135,12 +150,13 @@ plot!(problem, label="prediction")
   built-in models, and is uniform otherwise.
 
 - `half_life=Inf`: set to a real positive number to replace the sum of squares loss with a
-  weighted version; weights decay in reverse time with the specified `half_life`
+  weighted version; weights decay in reverse time with the specified `half_life`. Ignored
+  by Gauss-Newton optimisers.
 
-- `penalty=0.0` (range=``[0, ∞)``): the larger the positive value, the more a loss
-  function modification discourages large differences in `v0` and `v∞` on a log
-  scale. Helps discourage `v0` and `v∞` drifting out of bounds in models whose ODE have a
-  singularity at the origin.
+- `penalty=0.0` (range=``[0, ∞)``): the larger the positive value, the more a loss penalty
+  discourages large differences in `v0` and `v∞` on a log scale. Helps discourage `v0` and
+  `v∞` drifting out of bounds in models whose ODE have a singularity at the origin. Model
+  must include `v0` and `v∞` as parameters. Ignored by Gauss-Newton optimisers.
 
 - `ode_options...`: optional keyword arguments for the ODE solver,
   `DifferentialEquations.solve`, from DifferentialEquations.jl. Not relevant for models
@@ -153,12 +169,15 @@ function CalibrationProblem(
     model;
     p0=guess_parameters(times, volumes, model),
     scale=TumorGrowth.scale_function(times, volumes, model),
-    g=TumorGrowth.constraint_function(model),
-    frozen = NamedTuple(),
-    half_life = Inf,
-    penalty = 0.0,
-    learning_rate = nothing,
-    optimiser=Optimisers.Adam(learning_rate),
+    lower=TumorGrowth.lower(model),
+    upper=TumorGrowth.upper(model),
+    frozen=NamedTuple(),
+    half_life=Inf,
+    penalty=0.0,
+    learning_rate=nothing,
+    optimiser=nothing,
+    delta=optimiser isa LSO.LevenbergMarquardt ? 10.0 : 1.0,
+    Δ=delta,
     ode_options...,
     )
 
@@ -169,6 +188,7 @@ function CalibrationProblem(
             learning_rate = 0.0001
         end
     end
+    isnothing(optimiser) && (optimiser = Optimisers.Adam(learning_rate))
 
     times = collect(times)
 
@@ -210,11 +230,12 @@ function CalibrationProblem(
         volumes,
         model,
         p;
-        g,
+        lower,
+        upper,
+        Δ,
         frozen=actual_frozen,
         scale=actual_scale,
         loss,
-        learning_rate,
         optimiser,
         ode_options...,
     )

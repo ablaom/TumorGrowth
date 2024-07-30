@@ -45,4 +45,5 @@ guess_parameters(times, volumes, ::typeof(bertalanffy_numerical)) =
 scale_function(times, volumes, model::typeof(bertalanffy_numerical)) =
     scale_function(times, volumes, bertalanffy)
 
-constraint_function(::typeof(bertalanffy_numerical)) = constraint_function(bertalanffy)
+lower(::typeof(bertalanffy_numerical)) = lower(bertalanffy)
+upper(::typeof(bertalanffy_numerical)) = upper(bertalanffy)

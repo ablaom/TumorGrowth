@@ -41,16 +41,6 @@ end
         yplot = model(xplot, p)
         xplot, yplot
     end
-    if model == bertalanffy2
-        @series begin
-            label := "$model (carrying capacity)"
-            seriestype := :path
-            linestyle := :dot
-            xplot = range(times[1], times[end], length=200)
-            yplot = last.(model(xplot, p; capacity=true))
-            xplot, yplot
-        end
-    end
     @series begin
         label := :none
         seriestype := :scatter

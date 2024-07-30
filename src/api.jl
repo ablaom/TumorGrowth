@@ -8,6 +8,10 @@
 # it is wrapped as a `ComponentArray` because adjoint sensitivity computations applied in
 # SciMLSensitivity.jl need parameters to be arrays.)
 
+const DOC_OPTIMISER = "Here `optimiser` is an optimiser from Optimisers.jl "*
+    "(or implements the same API) or is one of: `LevenbergMarquardt()`, "*
+    "or `Dogleg()`. "
+
 """
     guess_parameters(times, volumes, model)
 
@@ -35,41 +39,69 @@ Fallback returns the identity.
 """
 scale_function(times, volumes, model) = identity
 
-"""
-    constraint_function(model)
 
-Return an appropriate `Bool`-valued function `p -> g(p)` which is `false` whenever
-parameter `p` leaves the natural domain of `model`.
+"""
+    lower(model)
+
+Return a named tuple with the lower bound constraints on `model` parameters.
+
+For example, a return value of `(v0 = 0.1,)` indicates that `p.v0 > 0.1` is a hard
+constraint for `p`, in calls of the form `model(times, p)`, but all other components of
+`p` are unconstrained.
 
 # New model implementations
 
-Fallback returns `true` always.
+Fallback returns `NamedTuple()`.
 
 """
-constraint_function(model) = _ -> true
-
+lower(model) = NamedTuple()
 
 """
-    options(model)
+    upper(model)
 
-Default calibration options for `model` in model comparisons.
+Return a named tuple with the upper bound constraints on `model` parameters.
+
+For example, a return value of `(v0 = 1.0,)` indicates that `p.v0 < 1.0` is a hard
+constraint for `p`, in calls of the form `model(times, p)`, but all other components of
+`p` are unconstrained.
 
 # New model implementations
 
-Fallback returns `(learning_rate=0.0001, penalty=0.8)`
+Fallback returns `NamedTuple()`.
 
 """
-options(model) = (learning_rate=0.0001, penalty=0.8)
+upper(model) = NamedTuple()
 
 """
-    n_iterations(model)
+    options(model, optimiser)
 
-Default number of iterations to run calibration of `model` in model comparisons.
+Calibration options for a given `model` and `optimiser`, for use as default options in
+model comparisons. $DOC_OPTIMISER.
 
 # New model implementations
 
-Fallback returns 10000
+Fallback returns:
 
+- `(; Δ=10.0)` if `optimiser isa `LevenbergMarquardt`
+- `(; Δ=1.0)` if `optimiser isa `Dogleg`
+- `(learning_rate=0.0001, penalty=0.8)` otherwise
 
 """
-n_iterations(model) = 10000
+options(model, optimiser) = (learning_rate=0.0001, penalty=0.8)
+options(model, ::LSO.LevenbergMarquardt) = (; Δ=10.0)
+options(model, ::LSO.Dogleg) = (; Δ=1.0)
+
+"""
+    n_iterations(model, optimiser)
+
+Number of iterations, when calibrating `model` and using `optimiser`, to be adopted by
+default in model comparisons. $DOC_OPTIMISER.
+
+# New model implementations
+
+Fallback returns `10000`, unless `optimiser isa Union{LevenbergMarquardt,Dogle}`, in which
+case `0` is returned (automatic).
+
+"""
+n_iterations(model, optimiser) = 10000
+n_iterations(model, ::GaussNewtonOptimiser) = 0

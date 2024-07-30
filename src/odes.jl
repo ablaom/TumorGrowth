@@ -1,6 +1,11 @@
 # The odes are here specified in a form suitable for DifferentialEquations.jl
 
 function boxcox(λ, x)
+    if x == 0
+        λ == 0 && return NaN
+        return -1/λ
+    end
+    x < 0 && return NaN
     λ == 0 && return log(x)
     (x^λ - 1)/λ
 end

@@ -4,6 +4,7 @@ import StableRNGs.StableRNG
 using IterationControl
 using Statistics
 using ComponentArrays
+import Optimisers
 
 # generate some data:
 rng = StableRNG(123)
@@ -13,10 +14,19 @@ volumes = gompertz(times, p) .* (1 .+ .05*rand(rng, 5))
 
 models = [logistic, bertalanffy]
 holdouts = 2
-options = TumorGrowth.options.(models)
-n_iters = TumorGrowth.n_iterations.(models)
-errs, ps =
-    TumorGrowth.errors(times, volumes, models, holdouts, options, n_iters, false, false)
+opt = Ref(Optimisers.Adam())
+options = TumorGrowth.options.(models, opt)
+n_iters = TumorGrowth.n_iterations.(models, opt)
+errs, ps = TumorGrowth.errors(
+    times,
+    volumes,
+    models,
+    holdouts,
+    Optimisers.Adam(0.0001),
+    options,
+    n_iters,
+    false,
+)
 
 # compute the `bertalanffy` error by hand:
 problem = CalibrationProblem(times[1:end-2], volumes[1:end-2], bertalanffy; options[2]...)
@@ -39,6 +49,7 @@ comparison = compare(times, volumes, models; holdouts)
     TumorGrowth.ERR_PLOTS_UNLOADED,
     compare(times, volumes, models; holdouts, plot=true),
 )
+
 using Plots
 comparison = compare(times, volumes, models; holdouts, plot=true)
 plot(comparison)

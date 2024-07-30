@@ -17,4 +17,5 @@ guess_parameters(times, volumes, ::typeof(gompertz)) =
 scale_function(times, volumes, model::typeof(gompertz)) =
     scale_function(times, volumes, classical_bertalanffy)
 
-constraint_function(model::typeof(gompertz)) = constraint_function(classical_bertalanffy)
+lower(model::typeof(gompertz)) = lower(classical_bertalanffy)
+upper(model::typeof(gompertz)) = upper(classical_bertalanffy)

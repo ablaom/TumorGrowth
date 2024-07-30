@@ -124,7 +124,8 @@ function scale_function(times, volumes, model::Neural2)
     return p ->  (v0=volume_scale*p.v0, v∞=volume_scale*p.v∞, θ=p.θ)
 end
 
-constraint_function(::Neural2) = constraint_function(classical_bertalanffy)
+lower(::Neural2) = lower(classical_bertalanffy)
+upper(::Neural2) = upper(classical_bertalanffy)
 
 options(::Neural2) =
     (; learning_rate=0.001, frozen=(; v∞=nothing), penalty=0.3)

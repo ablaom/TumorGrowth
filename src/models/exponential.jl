@@ -39,4 +39,4 @@ function scale_function(times, volumes, model::typeof(exponential))
     return p -> (v0=volume_scale*p.v0, ω=p.ω/time_scale)
 end
 
-constraint_function(model::typeof(exponential)) =  p -> p.v0 > 0
+lower(model::typeof(exponential)) =  (; v0=0)

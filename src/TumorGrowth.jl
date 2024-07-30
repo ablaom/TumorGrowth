@@ -50,11 +50,10 @@ respect to the ODE parameters, and initial conditions to be optimised.
 module TumorGrowth
 
 import DifferentialEquations as DE
-import SciMLSensitivity as Sens
+import SciMLSensitivity as Sens  # used also for Zygote
 import LeastSquaresOptim as LSO
 import LeastSquaresOptim: LevenbergMarquardt, Dogleg
 using Suppressor
-using Zygote
 import CSV
 import Tables
 using Optimisers
@@ -73,6 +72,9 @@ include("patient_data.jl")
 include("tools.jl")
 include("functor.jl")
 include("odes.jl")
+include("optimisers.jl")
+include("calibration.jl")
+include("compare.jl")
 include("api.jl")
 include("models/shared.jl")
 include("models/bertalanffy.jl")
@@ -85,9 +87,6 @@ include("models/exponential.jl")
 include("models/neural.jl")
 include("models/neural2.jl")
 include("pretty.jl")
-include("optimisers.jl")
-include("calibration.jl")
-include("compare.jl")
 
 export patient_data,
     flat_patient_data,
