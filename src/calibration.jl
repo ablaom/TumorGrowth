@@ -120,11 +120,11 @@ plot!(problem, label="prediction")
 
 - `lower`: named tuple indicating lower bounds on components of the model parameter
   `p`. For example, if `lower=(; v0=0.1)`, then this introduces the constraint `p.v0 <
-  0.1`. The model-specific default value is `TumorGrowth.lower(model)`.
+  0.1`. The model-specific default value is `TumorGrowth.lower_default(model)`.
 
 - `upper`: named tuple indicating upper bounds on components of the model parameter
   `p`. For example, if `upper=(; v0=100)`, then this introduces the constraint `p.v0 <
-  100`. The model-specific default value is `TumorGrowth.upper(model)`.
+  100`. The model-specific default value is `TumorGrowth.upper_default(model)`.
 
 - `frozen`: a named tuple, such as `(; v0=nothing, λ=1/2)`; indicating parameters to be
   frozen at specified values during optimisation; a `nothing` value means freeze at
@@ -168,9 +168,9 @@ function CalibrationProblem(
     volumes,
     model;
     p0=guess_parameters(times, volumes, model),
-    scale=TumorGrowth.scale_function(times, volumes, model),
-    lower=TumorGrowth.lower(model),
-    upper=TumorGrowth.upper(model),
+    scale=TumorGrowth.scale_default(times, volumes, model),
+    lower=TumorGrowth.lower_default(model),
+    upper=TumorGrowth.upper_default(model),
     frozen=NamedTuple(),
     half_life=Inf,
     penalty=0.0,

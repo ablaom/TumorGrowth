@@ -92,12 +92,12 @@ function guess_parameters(times, volumes, ::typeof(bertalanffy2))
 
 end
 
-function scale_function(times, volumes, model::typeof(bertalanffy2))
+function scale_default(times, volumes, model::typeof(bertalanffy2))
     p = guess_parameters(times, volumes, model)
     volume_scale = abs(p.v∞)
     time_scale = 1/abs(p.ω)
     p -> (v0=volume_scale*p.v0, v∞=volume_scale*p.v∞, ω=p.ω/time_scale, λ=p.λ, γ=p.γ)
 end
 
-lower(::typeof(bertalanffy2)) = lower(classical_bertalanffy)
-upper(::typeof(bertalanffy2)) = upper(classical_bertalanffy)
+lower_default(::typeof(bertalanffy2)) = lower_default(classical_bertalanffy)
+upper_default(::typeof(bertalanffy2)) = upper_default(classical_bertalanffy)

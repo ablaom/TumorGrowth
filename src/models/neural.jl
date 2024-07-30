@@ -115,14 +115,14 @@ function guess_parameters(times, volumes, model::Neural)
         return (; v0, v∞, θ)
 end
 
-function scale_function(times, volumes, model::Neural)
+function scale_default(times, volumes, model::Neural)
     volume_scale = sum(volumes)/length(volumes)
     return p ->  (v0=volume_scale*p.v0, v∞=volume_scale*p.v∞, θ=p.θ)
 end
 
-lower(::Neural) = lower(classical_bertalanffy)
-upper(::Neural) = upper(classical_bertalanffy)
+lower_default(::Neural) = lower_default(classical_bertalanffy)
+upper_default(::Neural) = upper_default(classical_bertalanffy)
 
 options(::Neural) = (; learning_rate=0.001, frozen=(; v∞=nothing), penalty=0.3)
 
-n_iterations(::Neural) = 2500
+n_iterations_default(::Neural) = 2500

@@ -26,7 +26,7 @@ parameter values in calibration problems.
 guess_parameters(times, volumes, model) = nothing
 
 """
-    scale_function(times, volumes, model)
+    scale_default(times, volumes, model)
 
 Return an appropriate function `p -> f(p)` so that `p = f(q)` has a value of the same
 order of magnitude expected for `model` parameters, whenever `q` has the same form as `p`
@@ -37,11 +37,11 @@ but with all values equal to one.
 Fallback returns the identity.
 
 """
-scale_function(times, volumes, model) = identity
+scale_default(times, volumes, model) = identity
 
 
 """
-    lower(model)
+    lower_default(model)
 
 Return a named tuple with the lower bound constraints on `model` parameters.
 
@@ -54,10 +54,10 @@ constraint for `p`, in calls of the form `model(times, p)`, but all other compon
 Fallback returns `NamedTuple()`.
 
 """
-lower(model) = NamedTuple()
+lower_default(model) = NamedTuple()
 
 """
-    upper(model)
+    upper_default(model)
 
 Return a named tuple with the upper bound constraints on `model` parameters.
 
@@ -70,7 +70,7 @@ constraint for `p`, in calls of the form `model(times, p)`, but all other compon
 Fallback returns `NamedTuple()`.
 
 """
-upper(model) = NamedTuple()
+upper_default(model) = NamedTuple()
 
 """
     options(model, optimiser)
@@ -92,7 +92,7 @@ options(model, ::LSO.LevenbergMarquardt) = (; Δ=10.0)
 options(model, ::LSO.Dogleg) = (; Δ=1.0)
 
 """
-    n_iterations(model, optimiser)
+    n_iterations_default(model, optimiser)
 
 Number of iterations, when calibrating `model` and using `optimiser`, to be adopted by
 default in model comparisons. $DOC_OPTIMISER.
@@ -103,5 +103,5 @@ Fallback returns `10000`, unless `optimiser isa Union{LevenbergMarquardt,Dogle}`
 case `0` is returned (automatic).
 
 """
-n_iterations(model, optimiser) = 10000
-n_iterations(model, ::GaussNewtonOptimiser) = 0
+n_iterations_default(model, optimiser) = 10000
+n_iterations_default(model, ::GaussNewtonOptimiser) = 0

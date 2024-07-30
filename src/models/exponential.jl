@@ -32,11 +32,11 @@ function guess_parameters(times, volumes, ::typeof(exponential))
     return (; v0, ω)
 end
 
-function scale_function(times, volumes, model::typeof(exponential))
+function scale_default(times, volumes, model::typeof(exponential))
     p = guess_parameters(times, volumes, model)
     volume_scale = abs(p.v0)
     time_scale = log(2)/abs(p.ω)
     return p -> (v0=volume_scale*p.v0, ω=p.ω/time_scale)
 end
 
-lower(model::typeof(exponential)) =  (; v0=0)
+lower_default(model::typeof(exponential)) =  (; v0=0)

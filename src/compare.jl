@@ -30,7 +30,6 @@ struct ModelComparison{T<:Real, MTuple<:Tuple, OTuple<:Tuple, N, M, PTuple<:Tupl
         n_iterations=nothing,
         metric=mae,
         plot=false,
-        flag_out_of_bounds=false,
         ) where T<:Real
 
         if isnothing(learning_rate)
@@ -44,7 +43,7 @@ struct ModelComparison{T<:Real, MTuple<:Tuple, OTuple<:Tuple, N, M, PTuple<:Tupl
         isnothing(calibration_options) &&
             (calibration_options = TumorGrowth.options.(models, Ref(optimiser)))
         isnothing(n_iterations) &&
-            (n_iterations = TumorGrowth.n_iterations.(models, Ref(optimiser)))
+            (n_iterations = TumorGrowth.n_iterations_default.(models, Ref(optimiser)))
 
         length(models) == length(calibration_options) == length(n_iterations) ||
             throw(ERR_MISMATCH)

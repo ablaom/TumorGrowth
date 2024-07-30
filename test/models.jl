@@ -39,14 +39,14 @@ end
 
 @testset "scale_function" begin
     # classical:
-    s1 = TumorGrowth.scale_function(times, volumes, gompertz)
+    s1 = TumorGrowth.scale_default(times, volumes, gompertz)
     scales = s1((v0=1.0, v∞=1.0, ω=1.0))
     @test scales.v0 == 15.0
     @test scales.v∞ == 15.0
     @test scales.ω ≈ abs.(TumorGrowth.guess_parameters(times, volumes, gompertz).ω)
 
     # one-dimensional TumorGrowth:
-    s1 = TumorGrowth.scale_function(times, volumes, bertalanffy)
+    s1 = TumorGrowth.scale_default(times, volumes, bertalanffy)
     scales = s1((v0=1.0, v∞=1.0, ω=1.0, λ=1.0))
     @test scales.v0 == 15.0
     @test scales.v∞ == 15.0
@@ -54,8 +54,8 @@ end
     @test scales.λ == 1.0
 
     # bertalanffy2:
-    s1 = TumorGrowth.scale_function(times, volumes, bertalanffy2)
-    p = guess_parameters(times, volumes, bertalanffy2)
+    s1 = TumorGrowth.scale_default(times, volumes, bertalanffy2)
+    p = TumorGrowth.guess_parameters(times, volumes, bertalanffy2)
     vol_scale = p.v∞
     scales = s1((v0=1.0, v∞=1.0, ω=1.0, λ=1.0, γ=1.0))
     @test scales.v0 ≈ vol_scale
@@ -65,19 +65,19 @@ end
     @test scales.γ == 1.0
 
     # exponential:
-    s1 = TumorGrowth.scale_function(times[1:2], exp.(2*times[1:2]), exponential)
+    s1 = TumorGrowth.scale_default(times[1:2], exp.(2*times[1:2]), exponential)
     scales = s1((v0=1.0, ω=1.0))
     @test scales.v0 == exp(2*times[1])
     @test scales.ω ≈ 2.0/log(2)
 
     # fallback:
-    @test TumorGrowth.scale_function(times, volumes, "junk") == identity
+    @test TumorGrowth.scale_default(times, volumes, "junk") == identity
 end
 
 @testset "lower and upper" begin
     for model in [gompertz, bertalanffy, bertalanffy2]
-        lower = TumorGrowth.lower(model)
-        upper = TumorGrowth.upper(model)
+        lower = TumorGrowth.lower_default(model)
+        upper = TumorGrowth.upper_default(model)
         p = TumorGrowth.guess_parameters(times, volumes, model)
         @test TumorGrowth.satisfies_constraints(p, lower, upper)
         p = merge(p, (; v∞ = -p.v∞))
@@ -88,12 +88,12 @@ end
         @test !TumorGrowth.satisfies_constraints(p, lower, upper)
     end
     model = exponential
-    lower = TumorGrowth.lower(model)
-    upper = TumorGrowth.upper(model)
+    lower = TumorGrowth.lower_default(model)
+    upper = TumorGrowth.upper_default(model)
     @test TumorGrowth.satisfies_constraints((; v0=1, ω=10), lower, upper)
     @test !TumorGrowth.satisfies_constraints((; v0=-1, ω=100), lower, upper)
-    @test isempty(TumorGrowth.lower("junk"))
-    @test isempty(TumorGrowth.upper("junk"))
+    @test isempty(TumorGrowth.lower_default("junk"))
+    @test isempty(TumorGrowth.upper_default("junk"))
 end
 
 tolerance = eps()*10^8 # 2.2e-8

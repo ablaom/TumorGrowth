@@ -16,7 +16,7 @@ models = [logistic, bertalanffy]
 holdouts = 2
 opt = Ref(Optimisers.Adam())
 options = TumorGrowth.options.(models, opt)
-n_iters = TumorGrowth.n_iterations.(models, opt)
+n_iters = TumorGrowth.n_iterations_default.(models, opt)
 errs, ps = TumorGrowth.errors(
     times,
     volumes,

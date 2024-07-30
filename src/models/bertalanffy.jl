@@ -36,14 +36,14 @@ end
 guess_parameters(times, volumes, ::typeof(bertalanffy)) =
     merge(guess_parameters(times, volumes, gompertz), (; λ=1/3))
 
-function scale_function(times, volumes, model::typeof(bertalanffy))
+function scale_default(times, volumes, model::typeof(bertalanffy))
     p = guess_parameters(times, volumes, model)
     volume_scale = abs(p.v∞)
     time_scale = 1/abs(p.ω)
     return p -> (v0=volume_scale*p.v0, v∞=volume_scale*p.v∞, ω=p.ω/time_scale, λ=p.λ)
 end
 
-lower(model::typeof(bertalanffy)) = lower(classical_bertalanffy)
-upper(model::typeof(bertalanffy)) = upper(classical_bertalanffy)
+lower_default(model::typeof(bertalanffy)) = lower_default(classical_bertalanffy)
+upper_default(model::typeof(bertalanffy)) = upper_default(classical_bertalanffy)
 
-n_iterations(::typeof(bertalanffy)) = 20000
+n_iterations_default(::typeof(bertalanffy)) = 20000
