@@ -9,7 +9,7 @@ const ERR_MISMATCH = DimensionMismatch(
 
 mae(ŷ, y) = abs.(ŷ .- y) |> mean
 
-struct ModelComparison{T<:Real, MTuple<:Tuple, OTuple<:Tuple, N, M, PTuple<:Tuple}
+struct ModelComparison{T<:Real,MTuple<:Tuple,OTuple<:Tuple,N,M,PTuple<:Tuple}
     times::Vector{T}
     volumes::Vector{T}
     models::MTuple
@@ -24,38 +24,22 @@ struct ModelComparison{T<:Real, MTuple<:Tuple, OTuple<:Tuple, N, M, PTuple<:Tupl
         volumes::Vector{T},
         models;
         holdouts=3,
-        learning_rate=nothing,
-        optimiser=nothing,
-        calibration_options=nothing,
-        n_iterations=nothing,
+        calibration_options=fill((;), length(models)),
+        n_iterations=fill(nothing, length(models)),
         metric=mae,
         plot=false,
         ) where T<:Real
-
-        if isnothing(learning_rate)
-            if optimiser isa GaussNewtonOptimiser
-                learning_rate = 0.0
-            else
-                learning_rate = 0.0001
-            end
-        end
-        isnothing(optimiser) && (optimiser = Optimisers.Adam(learning_rate))
-        isnothing(calibration_options) &&
-            (calibration_options = TumorGrowth.options.(models, Ref(optimiser)))
-        isnothing(n_iterations) &&
-            (n_iterations = TumorGrowth.n_iterations_default.(models, Ref(optimiser)))
 
         length(models) == length(calibration_options) == length(n_iterations) ||
             throw(ERR_MISMATCH)
         _models = Tuple(models)
         _options = Tuple(calibration_options)
-        errors, parameters =
+        errors, parameters, actual_iterations =
             TumorGrowth.errors(
                 times,
                 volumes,
                 _models,
                 holdouts,
-                optimiser,
                 _options,
                 n_iterations,
                 plot,
@@ -68,7 +52,7 @@ struct ModelComparison{T<:Real, MTuple<:Tuple, OTuple<:Tuple, N, M, PTuple<:Tupl
             _models,
             holdouts,
             _options,
-            Tuple(n_iterations),
+            actual_iterations,
             metric,
             errors,
             parameters,
@@ -129,25 +113,14 @@ plot(comparison, title="A comparison of two models")
   example, any regression measure from StatisticalMeasures.jl can be used here. The
   built-in fallback is mean absolute error.
 
-- `optimiser=Optimisers.Adam(learning_rate)`: optimiser. There are two kinds:
-
-  - A gradient descent optimiser: this must be from Optimisers.jl or implement the same
-    API.
-
-  - A Gauss-Newton optimiser: either `LevenbergMarquardt()`, `Dogleg()`, which may be
-    provided an optional solver argument; see LeastSquaresOptim.jl for details.
-
 - `n_iterations=TumorGrowth.n_iterations.(models)`: a vector of iteration counts for the
   calibration of `models`
 
-- `calibration_options`: a vector of named tuples providing keyword arguments for
-  `CalibrationProblem`s - one for each model. Possible keywords are: `p0`, `lower`,
-  `upper`, `frozen` (empty by default), `learning_rate`, `Δ`, `scale`, `half_life` (`Inf`
-  by default), `penalty`, and splatted `ode_options`; see [`CalibrationProblem`](@ref) for
-  details. If not specified, default values are inferred using the following methods:
-  [`TumorGrowth.guess_parameters`](@ref), [`TumorGrowth.lower`](@ref),
-  [`TumorGrowth.upper`](@ref), [`TumorGrowth.scale`](@ref), [`TumorGrowth.options`](@ref)
-  (`learning_rate`, `penalty`, `Δ`).
+- `calibration_options`: a vector of named tuples providing keyword arguments for the
+  `CalibrationProblem` for each model. Possible keys are: `p0`, `lower`, `upper`,
+  `frozen`, `learning_rate`, `optimiser`, `radius`, `scale`, `half_life`, `penalty`, and
+  keys corresponding to any ODE solver options. Keys left unspecified fall back to
+  defaults, as these are described in the [`CalibrationProblem`](@ref) document string.
 
 See also [`errors`](@ref), [`parameters`](@ref).
 
@@ -177,7 +150,6 @@ function errors(
     evolumes,
     models,
     holdouts,
-    optimiser,
     options,
     n_iterations,
     plot,
@@ -185,23 +157,34 @@ function errors(
     times = etimes[1:end-holdouts]
     volumes = evolumes[1:end-holdouts]
 
+    # initialize what will be the actual number of iterations used:
+    actual_iterations = Int[]
+
     i = 0
     error_param_pairs = map(models) do model
         i += 1
-        n_iter = n_iterations[i]
-        step =
-            optimiser isa GaussNewtonOptimiser ? Step(n_iter) : Step(1)
-        number_limit =
-            optimiser isa GaussNewtonOptimiser ? NumberLimit(1) : NumberLimit(n_iter)
-        predicate =
-            optimiser isa GaussNewtonOptimiser ? 1 : div(n_iter, 50)
-        problem = CalibrationProblem(times, volumes, model; optimiser, options[i]...)
-        controls = Any[step, InvalidValue(), number_limit]
-        plot && push!(controls, IterationControl.skip(
-            Callback(pr-> (TumorGrowth.plot(pr); TumorGrowth.gui()));
-            predicate,
-        ))
-        outcomes = solve!(problem, controls...)
+        problem = CalibrationProblem(times, volumes, model;  options[i]...)
+        optimiser = TumorGrowth.optimiser(problem)
+        n_iter = isnothing(n_iterations[i]) ? n_iterations_default(model, optimiser) :
+            n_iterations[i]
+        push!(actual_iterations, n_iter)
+        if n_iter > 0
+            step =
+                optimiser isa GaussNewtonOptimiser ? Step(n_iter) : Step(1)
+            number_limit =
+                optimiser isa GaussNewtonOptimiser ? NumberLimit(1) : NumberLimit(n_iter)
+            predicate =
+                optimiser isa GaussNewtonOptimiser ? 1 : div(n_iter, 50)
+            controls = Any[step, InvalidValue(), number_limit]
+            plot && push!(controls, IterationControl.skip(
+                Callback(pr-> (TumorGrowth.plot(pr); TumorGrowth.gui()));
+                predicate,
+            ))
+            solve!(problem, controls...)
+        else
+            solve!(problem, 0)
+            plot && (TumorGrowth.plot(problem); gui())
+        end
         p = solution(problem)
         v̂ = model(etimes, p)
         error = mae(v̂[end-holdouts+1:end], evolumes[end-holdouts+1:end])
@@ -209,7 +192,7 @@ function errors(
     end
 
     error_tuple, params = zip(error_param_pairs...)
-    return collect(error_tuple), params
+    return collect(error_tuple), params, Tuple(actual_iterations)
 end
 
 function Base.show(io::IO, comparison::ModelComparison)

@@ -37,7 +37,7 @@ volumes = [3, 6, 15]
     @test isnothing(TumorGrowth.guess_parameters(times, volumes, "junk"))
 end
 
-@testset "scale_function" begin
+@testset "scale_default" begin
     # classical:
     s1 = TumorGrowth.scale_default(times, volumes, gompertz)
     scales = s1((v0=1.0, v∞=1.0, ω=1.0))
@@ -74,7 +74,7 @@ end
     @test TumorGrowth.scale_default(times, volumes, "junk") == identity
 end
 
-@testset "lower and upper" begin
+@testset "lower and upper defaults" begin
     for model in [gompertz, bertalanffy, bertalanffy2]
         lower = TumorGrowth.lower_default(model)
         upper = TumorGrowth.upper_default(model)

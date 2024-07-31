@@ -125,7 +125,7 @@ mutable struct GaussNewtonProblem{
         reconstruct::R,
         ) where {P,O,R}
 
-        # need to extend named tuple bounds to full-blown component arrays, matching the
+        # need to extend bounds to full-blown component arrays, matching the
         # structure of `problem.x`, unless empty:
         l = isempty(lower) ? Float64[] : TumorGrowth.fill_gaps(lower, problem.x, -Inf)
         u = isempty(upper) ? Float64[] : TumorGrwoth.fill_gaps(upper, problem.x, Inf)
@@ -215,16 +215,17 @@ mutable struct CurveOptimisationProblem{T<:Number,FF,P}
         ))
 
         if optimiser isa GaussNewtonOptimiser
-            learning_rate == 0 ||
-                @warn "Optimiser is `$optimiser`, so ignoring `learning_rate`. "
-            loss isa TumorGrowth.WeightedL2Loss{Nothing} ||
-                @warn "Optimiser is `$optimiser`, so all is data weighted equally. "
 
             # `pfree` has the keys that appear in `frozen` removed; `reconstruct` lets us
             # restore the frozen entries:
             pfree, reconstruct = TumorGrowth.functor(p, frozen)
             cfree = ComponentArray(pfree)
             h(cfree) = F(xs, reconstruct(cfree))
+
+            # we need to remove the frozen keys from `lower` and `upper` as well:
+            kys = keys(frozen)
+            lower = delete(lower, kys)
+            upper = delete(upper, kys)
 
             # in-place version of function whose output components get minimized, in the
             # sense of a sum of squares:
@@ -263,6 +264,8 @@ mutable struct CurveOptimisationProblem{T<:Number,FF,P}
         return new{T,FF,typeof(problem)}(xs, ys, F, problem)
     end
 end
+
+optimiser(problem::CurveOptimisationProblem) = problem.problem.optimiser
 
 function Base.show(io::IO, problem::CurveOptimisationProblem{T,FF,P}) where {T,FF,P}
     if P <: GaussNewtonProblem{<:Any,<:Any,<:LSO.Dogleg}

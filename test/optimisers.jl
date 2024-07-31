@@ -167,17 +167,6 @@ end
 end
 
 @testset "CurveOptimisationProblem: Gauss-Newton" begin
-    @test_logs(
-        (:warn,),
-        TumorGrowth.CurveOptimisationProblem(
-            xs, ys, F, p0, optimiser=LSO.Dogleg(), learning_rate=0.1),
-    )
-    @test_logs(
-        (:warn,),
-        TumorGrowth.CurveOptimisationProblem(
-            xs, ys, F, p0, optimiser=LSO.Dogleg(), loss="junk"),
-    )
-
     problem =
         TumorGrowth.CurveOptimisationProblem(
             xs,

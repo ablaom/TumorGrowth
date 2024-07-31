@@ -40,13 +40,11 @@ $DOC_SEE_ALSO
 function bertalanffy2(
     times,
     p;
-    capacity=false,
-    saveat = times,
-    reltol = 1e-7, # this default determined by experiments with patient with id
-                   # "44f2f0cc8accfe91e86f0df74346a9d4-S3"; don't raise it without further
-                   # investigation.
     sensealg = Sens.InterpolatingAdjoint(; autojacvec = Sens.ZygoteVJP()),
-    kwargs..., # other DE.solve kwargs, eg, `reltol`, `abstol`
+    # this default determined by experiments with patient with id
+    # "44f2f0cc8accfe91e86f0df74346a9d4-S3"; don't raise it without further investigation.
+    reltol = 1e-7,
+    ode_options...,
     )
 
     times == sort(times) || throw(ERR_UNORDERED_TIMES)
@@ -60,7 +58,7 @@ function bertalanffy2(
     q0 = [v0/v∞, 1.0]
     p = [ω, λ, γ]
     problem = DE.ODEProblem(bertalanffy2_ode!, q0, tspan, p)
-    solution = DE.solve(problem, DE.Tsit5(); saveat, reltol, sensealg, kwargs...)
+    solution = DE.solve(problem, DE.Tsit5(); saveat=times, sensealg, reltol, ode_options...)
 
     # return to original scale:
     volumes = v∞ .* first.(solution.u)
@@ -101,3 +99,4 @@ end
 
 lower_default(::typeof(bertalanffy2)) = lower_default(classical_bertalanffy)
 upper_default(::typeof(bertalanffy2)) = upper_default(classical_bertalanffy)
+penalty_default(::typeof(bertalanffy2)) = 0.8

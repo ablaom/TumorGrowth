@@ -40,3 +40,4 @@ function scale_default(times, volumes, model::typeof(exponential))
 end
 
 lower_default(model::typeof(exponential)) =  (; v0=0)
+penalty_default(::typeof(exponential)) = 0.8

@@ -44,6 +44,7 @@ function scale_default(times, volumes, model::typeof(bertalanffy))
 end
 
 lower_default(model::typeof(bertalanffy)) = lower_default(classical_bertalanffy)
-upper_default(model::typeof(bertalanffy)) = upper_default(classical_bertalanffy)
+penalty_default(::typeof(bertalanffy)) = 0.8
 
-n_iterations_default(::typeof(bertalanffy)) = 20000
+n_iterations_default(::typeof(bertalanffy), optimiser) = 20000
+n_iterations_default(::typeof(bertalanffy), optimiser::GaussNewtonOptimiser) = 0

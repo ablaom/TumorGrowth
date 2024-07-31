@@ -33,3 +33,4 @@ function scale_default(times, volumes, model::typeof(classical_bertalanffy))
 end
 
 lower_default(model::typeof(classical_bertalanffy)) = (v0=0, v∞=0)
+penalty_default(::typeof(classical_bertalanffy)) = 0.8

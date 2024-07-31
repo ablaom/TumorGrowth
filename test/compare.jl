@@ -8,41 +8,71 @@ import Optimisers
 
 # generate some data:
 rng = StableRNG(123)
-p = (v0 = 0.013, v∞ = 0.000725, ω = 0.077, λ = 0.2, γ = 1.05)
-times = range(0.1, stop=47.0, length=5) .* (1 .+ .05*rand(rng, 5))
-volumes = gompertz(times, p) .* (1 .+ .05*rand(rng, 5))
+ptrue = (v0 = 0.013, v∞ = 0.000725, ω = 0.077, λ = 0.2)
+times = range(0.1, stop=47.0, length=8) .* (1 .+ .05*rand(rng, 8))
+volumes = bertalanffy(times, ptrue) #.* (1 .+ .05*rand(rng, 8))
 
-models = [logistic, bertalanffy]
+models =  [bertalanffy,             logistic, gompertz]
 holdouts = 2
-opt = Ref(Optimisers.Adam())
-options = TumorGrowth.options.(models, opt)
-n_iters = TumorGrowth.n_iterations_default.(models, opt)
+options = [(; optimiser=Dogleg()), (;),       (;)]
+n_iters = [nothing,                nothing,   3]
 errs, ps = TumorGrowth.errors(
     times,
     volumes,
     models,
     holdouts,
-    Optimisers.Adam(0.0001),
     options,
     n_iters,
     false,
 )
 
-# compute the `bertalanffy` error by hand:
-problem = CalibrationProblem(times[1:end-2], volumes[1:end-2], bertalanffy; options[2]...)
-solve!(problem, Step(1), InvalidValue(), NumberLimit(n_iters[2]))
+# # compute errors by hand
+
+# 1. bertalanffy (Dogleg)
+problem=CalibrationProblem(times[1:end-2], volumes[1:end-2], bertalanffy; optimiser=Dogleg())
+solve!(problem, 0)
 p = solution(problem)
 v̂ = bertalanffy(times, p)
-err = mean(abs.(v̂[end-1:end] - volumes[end-1:end]))
+err_bertalanffy = mean(abs.(v̂[end-1:end] - volumes[end-1:end]))
 
-# and compare with `TumorGrowth.errors`:
-@test ComponentArray(ps[2]) ≈  ComponentArray(p)
-@test errs[2] ≈ err
+# 2. logistic (Adam)
+problem = CalibrationProblem(times[1:end-2], volumes[1:end-2], logistic)
+n_iter = TumorGrowth.n_iterations_default(logistic, "adam")
+solve!(problem, Step(1), InvalidValue(), NumberLimit(n_iter))
+p = solution(problem)
+v̂ = logistic(times, p)
+err_logistic = mean(abs.(v̂[end-1:end] - volumes[end-1:end]))
+
+# 3. gompertz (Adam, n_iterations specified)
+problem=CalibrationProblem(times[1:end-2], volumes[1:end-2], gompertz)
+solve!(problem, 3)
+p = solution(problem)
+v̂ = gompertz(times, p)
+err_gompertz = mean(abs.(v̂[end-1:end] - volumes[end-1:end]))
+
+# # compare with `TumorGrowth.errors` result:
+# @test ComponentArray(ps[2]) ≈  ComponentArray(p)
+@test errs[1] ≈ err_bertalanffy
+@test errs[2] ≈ err_logistic
+@test errs[3] ≈ err_gompertz
 
 # integration:
-comparison = compare(times, volumes, models; holdouts)
-@test ComponentArray(parameters(comparison)[2]) ≈ ComponentArray(p)
-@test errors(comparison)[2] ≈ err
+comparison = compare(
+    times,
+    volumes,
+    models;
+    holdouts,
+    calibration_options=options,
+    n_iterations=n_iters,
+)
+@test comparison.n_iterations ==
+    (0, TumorGrowth.n_iterations_default(
+        logistic,
+        TumorGrowth.optimiser_default(logistic),
+        ),
+     3)
+@test ComponentArray(parameters(comparison)[1]) ≈ ComponentArray(ptrue)
+@test errors(comparison)[2] ≈ err_logistic
 
 # smoke tests for plots:
 @test_throws(

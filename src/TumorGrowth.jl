@@ -113,7 +113,8 @@ export patient_data,
     errors,
     Dogleg,
     LevenbergMarquardt,
-    LeastSquaresOptim
+    LeastSquaresOptim,
+    Optimisers
 
 # for julia < 1.9
 if !isdefined(Base, :get_extension)

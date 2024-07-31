@@ -12,12 +12,27 @@ mape(yhat, y) = sum(broadcast(normalized_absolute_difference, yhat, y))/length(y
 
 @testset "CalibrationProblem" begin
 
-    # test calibration using bertalanffy2:
     tol = 0.3
     rng = StableRNG(123)
     p_true = (v0 = 0.013, v∞ = 0.000725, ω = 0.077, λ = 0.2, γ = 1.05)
     times = range(0.1, stop=47.0, length=5) .* (1 .+ .05*rand(rng, 5))
     volumes_true = bertalanffy2(times, p_true)
+
+    # first, a smoke test for LevenbergMarquardt:
+    problem = CalibrationProblem(
+        times,
+        volumes_true,
+        bertalanffy2;
+        frozen = (; λ=p_true[4]),
+        learning_rate=0.001,
+        optimiser=LevenbergMarquardt(),
+        penalty=0.01,
+        reltol=1e-6,
+    )
+    @test problem.curve_optimisation_problem.problem isa TumorGrowth.GaussNewtonProblem
+    solve!(problem, 0)
+
+    # returning to gradient descent:
     problem = CalibrationProblem(
         times,
         volumes_true,
