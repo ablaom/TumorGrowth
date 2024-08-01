@@ -3,19 +3,19 @@ const ERR_MODEL_NOT_VECTOR = ArgumentError(
         "must be a vector. "
 )
 const ERR_MISMATCH = DimensionMismatch(
-    "Either `calibration_options` `n_iterations` has a length different from the "*
+    "Either `calibration_options` `iterations` has a length different from the "*
     "number of models (which must be a vector other iterable). "
 )
 
 mae(ŷ, y) = abs.(ŷ .- y) |> mean
 
-struct ModelComparison{T<:Real, MTuple<:Tuple, OTuple<:Tuple, N, M, PTuple<:Tuple}
+struct ModelComparison{T<:Real,MTuple<:Tuple,OTuple<:Tuple,N,M,PTuple<:Tuple}
     times::Vector{T}
     volumes::Vector{T}
     models::MTuple
     holdouts::Int
     options::OTuple
-    n_iterations::NTuple{N,Int64}
+    iterations::NTuple{N,Int64}
     metric::M
     errors::Vector{T}
     parameters::PTuple
@@ -24,37 +24,35 @@ struct ModelComparison{T<:Real, MTuple<:Tuple, OTuple<:Tuple, N, M, PTuple<:Tupl
         volumes::Vector{T},
         models;
         holdouts=3,
-        calibration_options = options.(models),
-        n_iterations = n_iterations.(models),
+        calibration_options=fill((;), length(models)),
+        iterations=fill(nothing, length(models)),
         metric=mae,
         plot=false,
-        flag_out_of_bounds=false,
         ) where T<:Real
 
-        length(models) == length(calibration_options) == length(n_iterations) ||
+        length(models) == length(calibration_options) == length(iterations) ||
             throw(ERR_MISMATCH)
         _models = Tuple(models)
         _options = Tuple(calibration_options)
-        errors, parameters =
+        errors, parameters, actual_iterations =
             TumorGrowth.errors(
                 times,
                 volumes,
                 _models,
                 holdouts,
                 _options,
-                n_iterations,
+                iterations,
                 plot,
-                flag_out_of_bounds,
             ) # defined below
         MTuple = typeof(_models)
         OTuple = typeof(_options)
-        new{T, MTuple, OTuple, length(n_iterations), typeof(metric), typeof(parameters)}(
+        new{T, MTuple, OTuple, length(iterations), typeof(metric), typeof(parameters)}(
             times,
             volumes,
             _models,
             holdouts,
             _options,
-            Tuple(n_iterations),
+            actual_iterations,
             metric,
             errors,
             parameters,
@@ -99,7 +97,7 @@ julia> gompertz(times, p)
 When a model parameter becomes out of bounds, calibration stops early and the last
 in-bounds value is reported.
 
-# Visualing comparisons
+# Visualising comparisons
 
 ```julia
 using Plots
@@ -115,16 +113,14 @@ plot(comparison, title="A comparison of two models")
   example, any regression measure from StatisticalMeasures.jl can be used here. The
   built-in fallback is mean absolute error.
 
-- `n_iterations=TumorGrowth.n_iterations.(models)`: a vector of iteration counts for the
+- `iterations=TumorGrowth.iterations.(models)`: a vector of iteration counts for the
   calibration of `models`
 
-- `calibration_options=TumorGrowth.options.(models)`: a vector of named tuples providing
-  the keyword arguments for `CalibrationProblem`s - one for each model. See
-  [`CalibrationProblem`](@ref) for details.
-
-- `flag_out_of_bounds=false`: set to `true` to report `NaN` as the error for a model whose
-  parameter became out of bounds during calibration. Otherwise, the error for the last
-  in-bounds parameter is reported.
+- `calibration_options`: a vector of named tuples providing keyword arguments for the
+  `CalibrationProblem` for each model. Possible keys are: `p0`, `lower`, `upper`,
+  `frozen`, `learning_rate`, `optimiser`, `radius`, `scale`, `half_life`, `penalty`, and
+  keys corresponding to any ODE solver options. Keys left unspecified fall back to
+  defaults, as these are described in the [`CalibrationProblem`](@ref) document string.
 
 See also [`errors`](@ref), [`parameters`](@ref).
 
@@ -141,14 +137,13 @@ calls to [`compare`](@ref).
 errors(comparison::ModelComparison) = comparison.errors
 
 """
-    errors(comparison)
+    parameters(comparison)
 
-Extract the the vector of errors from a `ModelComparison` object, as returned by
+Extract the the vector of parameters from a `ModelComparison` object, as returned by
 calls to [`compare`](@ref).
 
 """
 parameters(comparison::ModelComparison) = comparison.parameters
-
 
 function errors(
     etimes,
@@ -156,38 +151,48 @@ function errors(
     models,
     holdouts,
     options,
-    n_iterations,
+    iterations,
     plot,
-    flag_out_of_bounds,
     )
-
     times = etimes[1:end-holdouts]
     volumes = evolumes[1:end-holdouts]
+
+    # initialize what will be the actual number of iterations used:
+    actual_iterations = Int[]
 
     i = 0
     error_param_pairs = map(models) do model
         i += 1
-        n_iter = n_iterations[i]
-        problem = CalibrationProblem(times, volumes, model; options[i]...)
-        controls = Any[Step(1), InvalidValue(), NumberLimit(n_iter)]
-        plot && push!(controls, IterationControl.skip(
-            Callback(pr-> (TumorGrowth.plot(pr); TumorGrowth.gui())),
-            predicate=div(n_iter, 50),
-        ))
-        outcomes = solve!(problem, controls...)
-        out_of_bounds = outcomes[2][2].done
-        p = solution(problem)
-        if out_of_bounds && flag_out_of_bounds
-            error = NaN
+        problem = CalibrationProblem(times, volumes, model;  options[i]...)
+        optimiser = TumorGrowth.optimiser(problem)
+        n_iter = isnothing(iterations[i]) ? iterations_default(model, optimiser) :
+            iterations[i]
+        push!(actual_iterations, n_iter)
+        if n_iter > 0
+            step =
+                optimiser isa GaussNewtonOptimiser ? Step(n_iter) : Step(1)
+            number_limit =
+                optimiser isa GaussNewtonOptimiser ? NumberLimit(1) : NumberLimit(n_iter)
+            predicate =
+                optimiser isa GaussNewtonOptimiser ? 1 : div(n_iter, 50)
+            controls = Any[step, InvalidValue(), number_limit]
+            plot && push!(controls, IterationControl.skip(
+                Callback(pr-> (TumorGrowth.plot(pr); TumorGrowth.gui()));
+                predicate,
+            ))
+            solve!(problem, controls...)
         else
-            v̂ = model(etimes, p)
-            error = mae(v̂[end-holdouts+1:end], evolumes[end-holdouts+1:end])
+            solve!(problem, 0)
+            plot && (TumorGrowth.plot(problem); gui())
         end
+        p = solution(problem)
+        v̂ = model(etimes, p)
+        error = mae(v̂[end-holdouts+1:end], evolumes[end-holdouts+1:end])
         (error, p)
     end
 
     error_tuple, params = zip(error_param_pairs...)
-    return collect(error_tuple), params
+    return collect(error_tuple), params, Tuple(actual_iterations)
 end
 
 function Base.show(io::IO, comparison::ModelComparison)

@@ -25,11 +25,12 @@ function guess_parameters(times, volumes, ::typeof(classical_bertalanffy))
     return (; v0, v∞, ω)
 end
 
-function scale_function(times, volumes, model::typeof(classical_bertalanffy))
+function scale_default(times, volumes, model::typeof(classical_bertalanffy))
     p = guess_parameters(times, volumes, model)
     volume_scale = abs(p.v∞)
     time_scale = 1/abs(p.ω)
     return p -> (v0=volume_scale*p.v0, v∞=volume_scale*p.v∞, ω=p.ω/time_scale)
 end
 
-constraint_function(model::typeof(classical_bertalanffy)) = p -> p.v0 > 0 && p.v∞ > 0
+lower_default(model::typeof(classical_bertalanffy)) = (v0=0, v∞=0)
+penalty_default(::typeof(classical_bertalanffy)) = 0.8

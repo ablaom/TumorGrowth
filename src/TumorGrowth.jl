@@ -1,6 +1,6 @@
 """
 
-TumorGrowth.jl provides the following models for tumor growth: 
+TumorGrowth.jl provides the following models for tumor growth:
 
 | model                           | description                             | parameters, `p`       | analytic? |
 |:--------------------------------|:----------------------------------------|:----------------------|:----------|
@@ -41,32 +41,35 @@ solver can be passed to the model call.
 TumorGrowth.jl also provides a [`CalibrationProblem`](@ref) tool to calibrate model
 parameters, and a [`compare`](@ref) tool to compare models on a holdout set.
 
-Calibration is performed using a gradient descent optimiser to
-minimise a (possibly weighted) least-squares error on provided clinical measurements, and
-uses the adjoint method to auto-differentiate solutions to the underlying ODE's, with
-respect to the ODE parameters, and initial conditions to be optimised.
-
 """
 module TumorGrowth
 
 import DifferentialEquations as DE
-import SciMLSensitivity as Sens
+import SciMLSensitivity as Sens  # used also for Zygote
+import LeastSquaresOptim as LSO
+import LeastSquaresOptim: LevenbergMarquardt, Dogleg
+using Suppressor
 import CSV
 import Tables
 using Optimisers
 using IterationControl
-using Random
 import Functors
 import Lux
 using UnPack
 using ComponentArrays
+
 using Statistics
+using Random
+
 
 include("plots.jl")
 include("patient_data.jl")
 include("tools.jl")
 include("functor.jl")
 include("odes.jl")
+include("optimisers.jl")
+include("calibration.jl")
+include("compare.jl")
 include("api.jl")
 include("models/shared.jl")
 include("models/bertalanffy.jl")
@@ -79,9 +82,6 @@ include("models/exponential.jl")
 include("models/neural.jl")
 include("models/neural2.jl")
 include("pretty.jl")
-include("optimisers.jl")
-include("calibration.jl")
-include("compare.jl")
 
 export patient_data,
     flat_patient_data,
@@ -105,7 +105,11 @@ export patient_data,
     pretty,
     solution,
     parameters,
-    errors
+    errors,
+    Dogleg,
+    LevenbergMarquardt,
+    LeastSquaresOptim,
+    Optimisers
 
 # for julia < 1.9
 if !isdefined(Base, :get_extension)

@@ -11,9 +11,6 @@ parameters are explained below.
 
 # Keyword options
 
-- `capacity=false`: Set to `true` to return the latent "carrying capacity" variable, in
-  addition to the actual volumes.
-
 - `solve_kwargs`: optional keyword arguments for the ODE solver,
   `DifferentialEquations.solve`, from DifferentialEquations.jl.
 
@@ -43,13 +40,11 @@ $DOC_SEE_ALSO
 function bertalanffy2(
     times,
     p;
-    capacity=false,
-    saveat = times,
-    reltol = 1e-7, # this default determined by experiments with patient with id
-                   # "44f2f0cc8accfe91e86f0df74346a9d4-S3"; don't raise it without further
-                   # investigation.
     sensealg = Sens.InterpolatingAdjoint(; autojacvec = Sens.ZygoteVJP()),
-    kwargs..., # other DE.solve kwargs, eg, `reltol`, `abstol`
+    # this default determined by experiments with patient with id
+    # "44f2f0cc8accfe91e86f0df74346a9d4-S3"; don't raise it without further investigation.
+    reltol = 1e-7,
+    ode_options...,
     )
 
     times == sort(times) || throw(ERR_UNORDERED_TIMES)
@@ -63,10 +58,14 @@ function bertalanffy2(
     q0 = [v0/v∞, 1.0]
     p = [ω, λ, γ]
     problem = DE.ODEProblem(bertalanffy2_ode!, q0, tspan, p)
-    solution = DE.solve(problem, DE.Tsit5(); saveat, reltol, sensealg, kwargs...)
+    solution = DE.solve(problem, DE.Tsit5(); saveat=times, sensealg, reltol, ode_options...)
+
     # return to original scale:
-    capacity || return v∞ .* first.(solution.u)
-    return v∞ .* solution.u
+    volumes = v∞ .* first.(solution.u)
+
+    # if the solution became unstable, we need to extend with NaN's:
+    TumorGrowth.is_okay(solution) && return volumes
+    return append!(volumes, fill(NaN, length(times) - length(volumes)))
 end
 
 function guess_parameters(times, volumes, ::typeof(bertalanffy2))
@@ -82,7 +81,7 @@ function guess_parameters(times, volumes, ::typeof(bertalanffy2))
     )
 
     try
-        outcomes = solve!(problem, Step(1), InvalidValue(), NumberLimit(1000))
+        outcomes = @suppress solve!(problem, Step(1), InvalidValue(), NumberLimit(1000))
         outcomes[2][2].done && return fallback # out of bounds
         return merge(solution(problem), (; γ=κ))
     catch
@@ -91,11 +90,13 @@ function guess_parameters(times, volumes, ::typeof(bertalanffy2))
 
 end
 
-function scale_function(times, volumes, model::typeof(bertalanffy2))
+function scale_default(times, volumes, model::typeof(bertalanffy2))
     p = guess_parameters(times, volumes, model)
     volume_scale = abs(p.v∞)
     time_scale = 1/abs(p.ω)
     p -> (v0=volume_scale*p.v0, v∞=volume_scale*p.v∞, ω=p.ω/time_scale, λ=p.λ, γ=p.γ)
 end
 
-constraint_function(::typeof(bertalanffy2)) = constraint_function(classical_bertalanffy)
+lower_default(::typeof(bertalanffy2)) = lower_default(classical_bertalanffy)
+upper_default(::typeof(bertalanffy2)) = upper_default(classical_bertalanffy)
+penalty_default(::typeof(bertalanffy2)) = 0.8

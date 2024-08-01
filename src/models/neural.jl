@@ -85,9 +85,8 @@ function (model::Neural)(
     v0,
     v∞,
     θ;
-    saveat = times,
     sensealg = Sens.InterpolatingAdjoint(; autojacvec = Sens.ZygoteVJP()),
-    kwargs..., # other `DifferentialEquations.solve` kwargs, eg, `reltol`, `abstol`
+    ode_options..., # other `DifferentialEquations.solve` kwargs, eg, `reltol`, `abstol`
     )
 
     times == sort(times) || throw(ERR_UNORDERED_TIMES)
@@ -100,13 +99,13 @@ function (model::Neural)(
     solution = DE.solve(
         problem,
         DE.Tsit5();
-        saveat,
+        saveat=times,
         sensealg,
     )
     # return to original scale:
     return v∞*inverse.(first.(solution.u))
 end
-(model::Neural)(times, p; kwargs...) = model(times, p.v0, p.v∞, p.θ; kwargs...)
+(model::Neural)(times, p; ode_options...) = model(times, p.v0, p.v∞, p.θ; ode_options...)
 
 function guess_parameters(times, volumes, model::Neural)
         v0 = first(volumes)
@@ -115,13 +114,15 @@ function guess_parameters(times, volumes, model::Neural)
         return (; v0, v∞, θ)
 end
 
-function scale_function(times, volumes, model::Neural)
+function scale_default(times, volumes, model::Neural)
     volume_scale = sum(volumes)/length(volumes)
     return p ->  (v0=volume_scale*p.v0, v∞=volume_scale*p.v∞, θ=p.θ)
 end
 
-constraint_function(::Neural) = constraint_function(classical_bertalanffy)
+lower_default(::Neural) = lower_default(classical_bertalanffy)
+penalty_default(::Neural) = 0.3
+frozen_default(::Neural) = (; v∞=nothing)
+optimiser_default(::Neural) = Optimisers.Adam(0.001)
 
-options(::Neural) = (; learning_rate=0.001, frozen=(; v∞=nothing), penalty=0.3)
-
-n_iterations(::Neural) = 2500
+iterations_default(::Neural, optimiser) = 2500
+iterations_default(::Neural, ::GaussNewtonOptimiser) = 0

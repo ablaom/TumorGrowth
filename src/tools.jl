@@ -39,7 +39,7 @@ struct WeightedL2Loss{T}
     weights::Vector{T}
     function WeightedL2Loss(times, h)
         h > 0 || error("Need positive half life. Set to `Inf` for no decay. ")
-        h == Inf && return new{Nothing}([nothing,])
+        h == Inf && return new{Nothing}(Nothing[])
         t_end = times[end]
         weights = map(times) do t
             exp(log(2)*(t - t_end)/h)
@@ -62,8 +62,8 @@ grab(x::Nothing, y) = y
 
 *Private method.*
 
-Return a new tuple by replacing any `nothing` values with the corresponding value in the
-`from` tuple, whenever a corresponding key exists, and otherwise ignore.
+Return a new named tuple by replacing any `nothing` values with the corresponding value in
+the `from` named tuple, whenever a corresponding key exists, and otherwise ignore.
 
 ```julia
 julia> recover((x=1, y=nothing, z=3, w=nothing), (x=10, y=2, k=7))
@@ -94,3 +94,113 @@ function merge(x::ComponentArray, y)
     p, reconstruct = TumorGrowth.functor(x)
     return merge(p, y) |> reconstruct
 end
+
+"""
+    delete(x, kys)
+
+**Private method.**
+
+Assuming `x` is a named tuple, return a copy of `x` with any key in `kys`
+removed. Otherwise, assuming `x` is a structured object (such as a `ComponentArray`) first
+convert to a named tuple and then delete the specified keys.
+
+"""
+function delete(x::NamedTuple, kys)
+    keep = filter(keys(x)) do k
+        !(k in kys)
+    end
+    values = map(keep) do k
+        getproperty(x, k)
+    end
+    NamedTuple{keep}(values)
+end
+
+function delete(x, kys)
+    p, _ = TumorGrowth.functor(x)
+    delete(p, kys)
+end
+
+"""
+    satisfies_constraints(x, lower, upper)
+
+**Private method.**
+
+Returns `true` if both of the following are true:
+
+- `upper.k < x.k` for each `k` appearing as a key of `upper`
+- `x.k < lower.k` for each `k` appearing as a key of `lower`
+
+Otherwise, returns `false`.
+
+"""
+function satisfies_constraints(x, lower, upper)
+    any(keys(lower)) do k
+        getproperty(x, k) ≤ getproperty(lower, k)
+    end && return false
+    any(keys(upper)) do k
+        getproperty(x, k) ≥ getproperty(upper, k)
+    end && return false
+    return true
+end
+
+"""
+    force_constraints!(x_candidate, x, lower, upper)
+
+**Private method.**
+
+Assumes `x` is a `ComponentArray` for which [`TumorGrowth.satisfies_constraints(x, lower,
+upper)`](@ref) is `true`. The method mutates those components of the `x_candidate` which
+do not satisfy the constraints by moving from `x` towards the boundary half the distance
+to the boundary, along the failed component.
+
+"""
+function force_constraints!(x_candidate, x, lower, upper)
+    for k in keys(lower)
+        L = getproperty(lower, k)
+        if getproperty(x_candidate, k) ≤ L
+            setproperty!(x_candidate, k, (L + getproperty(x, k))/2)
+        end
+    end
+    for k in keys(upper)
+        U = getproperty(upper, k)
+        if getproperty(x_candidate, k) ≥ U
+            setproperty!(x_candidate, k, (U + getproperty(x, k))/2)
+        end
+    end
+    return x_candidate
+end
+
+instead(::Number, filler) = filler
+instead(a::AbstractArray, filler) = instead.(a, Ref(filler))
+
+"""
+    fill_gaps(short, long, filler)
+
+**Private method.**
+
+Here `long` is a `ComponentArray` and `short` a named tuple with some of the keys from
+`long`. The method returns a `ComponentArray` with the same structure as `long` but with
+the values of `short` merged into `long`, with all other (possibly nested) values replaced
+with `filler` for numerical values or arrays of `Inf` in the case of array values.
+
+```julia
+long = (a=1, b=rand(1,2), c=(d=4, e=rand(2))) |> ComponentArray
+short = (; a=10) # could alternatively be a `ComponentArray`
+
+julia> TumorGrowth.fill_gaps(short, long, Inf)
+filled = ComponentVector{Float64}(a = 10.0, b = [Inf Inf], c = (d = Inf, e = [Inf, Inf]))
+
+julia> all(filled .> long)
+true
+
+"""
+function fill_gaps(short, long, filler)
+    long_nt, reconstruct = TumorGrowth.functor(Functors.fmap(t->instead(t, filler), long))
+    return merge(long_nt, first(TumorGrowth.functor(short))) |> reconstruct
+end
+
+const SUCCESS_RETURN_CODES = map([:Default, :Success]) do code
+    :(Sens.SciMLBase.ReturnCode.$code) |> eval
+end
+
+is_okay(solution) = solution.retcode in SUCCESS_RETURN_CODES

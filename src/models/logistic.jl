@@ -15,7 +15,8 @@ const verhulst = logistic
 guess_parameters(times, volumes, ::typeof(logistic)) =
     guess_parameters(times, volumes, classical_bertalanffy)
 
-scale_function(times, volumes, model::typeof(logistic)) =
-    scale_function(times, volumes, classical_bertalanffy)
+scale_default(times, volumes, ::typeof(logistic)) =
+    scale_default(times, volumes, classical_bertalanffy)
 
-constraint_function(model::typeof(logistic)) = constraint_function(classical_bertalanffy)
+lower_default(::typeof(logistic)) = lower_default(classical_bertalanffy)
+penalty_default(::typeof(logistic)) = 0.8
