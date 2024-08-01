@@ -5,6 +5,9 @@ import StableRNGs.StableRNG
 @testset "boxcox" begin
     @test TumorGrowth.boxcox(2, 3) ≈ (3^2 - 1)/2
     @test TumorGrowth.boxcox(0, 3) ≈ log(3)
+    @test TumorGrowth.boxcox(0, 0) |> isnan
+    @test TumorGrowth.boxcox(2, 0) ≈ -1/2
+    @test TumorGrowth.boxcox(1, -1) |> isnan
 end
 
 @testset "bertalanffy_ode" begin

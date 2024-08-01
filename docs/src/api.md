@@ -5,10 +5,11 @@ developers who want to permanently add new models to the package.
 
 Wherever a model, such as [`bertalanffy`](@ref) or [`gompertz`](@ref), appears in
 TumorGrowth.jl workflows, any function or other callable `mymodel` can be used, provided
-it has the right signature. The required signature is `mymodel(times, p)`, where `times`
-is a vector of times and `p` parameters of the model in the form of a named tuple, such as
-`p = (; v0=0.03, ω= 1.5)`. The return value of `mymodel` will be the corresponding volumes
-predicted by the model.
+it has the right signature. The required signature is `mymodel(times, p;
+ode_options=...)`, where `times` is a vector of times and `p` parameters of the model in
+the form of a named tuple, such as `p = (; v0=0.03, ω= 1.5)`; `ode_options` are options to
+be passed to the ODE solver (see below). The return value of `mymodel` will be the
+corresponding volumes predicted by the model.
 
 If the implementation of `mymodel` requires numerically solving an ordinary differential
 equation, follow the example given for the `bertalanffy2` model, which appears
@@ -33,8 +34,12 @@ end
 
 ```@docs
 TumorGrowth.guess_parameters
-TumorGrowth.scale_function
-TumorGrowth.constraint_function
-TumorGrowth.options
-TumorGrowth.n_iterations
+TumorGrowth.lower_default
+TumorGrowth.upper_default
+TumorGrowth.frozen_default
+TumorGrowth.optimiser_default
+TumorGrowth.scale_default
+TumorGrowth.penalty_default
+TumorGrowth.radius_default
+TumorGrowth.iterations_default
 ```

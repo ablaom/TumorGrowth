@@ -14,7 +14,8 @@ gompertz(times, p) = bertalanffy(times, TumorGrowth.merge(p, (; λ=0.0)))
 guess_parameters(times, volumes, ::typeof(gompertz)) =
     guess_parameters(times, volumes, classical_bertalanffy)
 
-scale_function(times, volumes, model::typeof(gompertz)) =
-    scale_function(times, volumes, classical_bertalanffy)
+scale_default(times, volumes, ::typeof(gompertz)) =
+    scale_default(times, volumes, classical_bertalanffy)
 
-constraint_function(model::typeof(gompertz)) = constraint_function(classical_bertalanffy)
+lower_default(::typeof(gompertz)) = lower_default(classical_bertalanffy)
+penalty_default(::typeof(gompertz)) = 0.8
