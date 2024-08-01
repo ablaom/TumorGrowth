@@ -225,8 +225,8 @@ calibration_options = [
     (frozen = (; v∞), learning_rate=0.001, half_life=21), # neural
     (frozen = (; v∞), learning_rate=0.001, half_life=21), # neural2
 ]
-n_iterations = [6000, 6000, 6000, 6000]
-comparison = compare(times, volumes, models; calibration_options, n_iterations)
+iterations = [6000, 6000, 6000, 6000]
+comparison = compare(times, volumes, models; calibration_options, iterations)
 
 #-
 

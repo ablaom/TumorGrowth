@@ -28,13 +28,13 @@ models = [
 ]
 
 holdouts = 2
-n_iterations = fill(2, length(models))
-comparison = compare(times, volumes, models; holdouts, n_iterations)
+iterations = fill(2, length(models))
+comparison = compare(times, volumes, models; holdouts, iterations)
 
 # smoke test:
 plot(comparison)
 
 calibration_options = fill((; optimiser=LevenbergMarquardt()), length(models))
-comparison = compare(times, volumes, models; holdouts, n_iterations, calibration_options)
+comparison = compare(times, volumes, models; holdouts, iterations, calibration_options)
 
 true

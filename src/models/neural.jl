@@ -124,5 +124,5 @@ penalty_default(::Neural) = 0.3
 frozen_default(::Neural) = (; v∞=nothing)
 optimiser_default(::Neural) = Optimisers.Adam(0.001)
 
-n_iterations_default(::Neural, optimiser) = 2500
-n_iterations_default(::Neural, ::GaussNewtonOptimiser) = 0
+iterations_default(::Neural, optimiser) = 2500
+iterations_default(::Neural, ::GaussNewtonOptimiser) = 0

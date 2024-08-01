@@ -37,13 +37,13 @@ err_bertalanffy = mean(abs.(v̂[end-1:end] - volumes[end-1:end]))
 
 # 2. logistic (Adam)
 problem = CalibrationProblem(times[1:end-2], volumes[1:end-2], logistic)
-n_iter = TumorGrowth.n_iterations_default(logistic, "adam")
+n_iter = TumorGrowth.iterations_default(logistic, "adam")
 solve!(problem, Step(1), InvalidValue(), NumberLimit(n_iter))
 p = solution(problem)
 v̂ = logistic(times, p)
 err_logistic = mean(abs.(v̂[end-1:end] - volumes[end-1:end]))
 
-# 3. gompertz (Adam, n_iterations specified)
+# 3. gompertz (Adam, iterations specified)
 problem=CalibrationProblem(times[1:end-2], volumes[1:end-2], gompertz)
 solve!(problem, 3)
 p = solution(problem)
@@ -63,10 +63,10 @@ comparison = compare(
     models;
     holdouts,
     calibration_options=options,
-    n_iterations=n_iters,
+    iterations=n_iters,
 )
-@test comparison.n_iterations ==
-    (0, TumorGrowth.n_iterations_default(
+@test comparison.iterations ==
+    (0, TumorGrowth.iterations_default(
         logistic,
         TumorGrowth.optimiser_default(logistic),
         ),

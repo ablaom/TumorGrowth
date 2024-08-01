@@ -145,7 +145,7 @@ radius_default(model, ::LSO.LevenbergMarquardt) = 10.0
 radius_default(model, ::LSO.Dogleg) = 1.0
 
 """
-    n_iterations_default(model, optimiser)
+    iterations_default(model, optimiser)
 
 Number of iterations, when calibrating `model` and using `optimiser`, to be adopted by
 default in model comparisons. $DOC_OPTIMISER.
@@ -156,5 +156,5 @@ Fallback returns `10000`, unless `optimiser isa Union{LevenbergMarquardt,Dogleg}
 which case `0` is returned (stopping controlled by LeastSquaresOptim.jl).
 
 """
-n_iterations_default(model, optimiser) = 10000
-n_iterations_default(model, ::GaussNewtonOptimiser) = 0
+iterations_default(model, optimiser) = 10000
+iterations_default(model, ::GaussNewtonOptimiser) = 0

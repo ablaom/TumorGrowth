@@ -3,7 +3,7 @@ const ERR_MODEL_NOT_VECTOR = ArgumentError(
         "must be a vector. "
 )
 const ERR_MISMATCH = DimensionMismatch(
-    "Either `calibration_options` `n_iterations` has a length different from the "*
+    "Either `calibration_options` `iterations` has a length different from the "*
     "number of models (which must be a vector other iterable). "
 )
 
@@ -15,7 +15,7 @@ struct ModelComparison{T<:Real,MTuple<:Tuple,OTuple<:Tuple,N,M,PTuple<:Tuple}
     models::MTuple
     holdouts::Int
     options::OTuple
-    n_iterations::NTuple{N,Int64}
+    iterations::NTuple{N,Int64}
     metric::M
     errors::Vector{T}
     parameters::PTuple
@@ -25,12 +25,12 @@ struct ModelComparison{T<:Real,MTuple<:Tuple,OTuple<:Tuple,N,M,PTuple<:Tuple}
         models;
         holdouts=3,
         calibration_options=fill((;), length(models)),
-        n_iterations=fill(nothing, length(models)),
+        iterations=fill(nothing, length(models)),
         metric=mae,
         plot=false,
         ) where T<:Real
 
-        length(models) == length(calibration_options) == length(n_iterations) ||
+        length(models) == length(calibration_options) == length(iterations) ||
             throw(ERR_MISMATCH)
         _models = Tuple(models)
         _options = Tuple(calibration_options)
@@ -41,12 +41,12 @@ struct ModelComparison{T<:Real,MTuple<:Tuple,OTuple<:Tuple,N,M,PTuple<:Tuple}
                 _models,
                 holdouts,
                 _options,
-                n_iterations,
+                iterations,
                 plot,
             ) # defined below
         MTuple = typeof(_models)
         OTuple = typeof(_options)
-        new{T, MTuple, OTuple, length(n_iterations), typeof(metric), typeof(parameters)}(
+        new{T, MTuple, OTuple, length(iterations), typeof(metric), typeof(parameters)}(
             times,
             volumes,
             _models,
@@ -113,7 +113,7 @@ plot(comparison, title="A comparison of two models")
   example, any regression measure from StatisticalMeasures.jl can be used here. The
   built-in fallback is mean absolute error.
 
-- `n_iterations=TumorGrowth.n_iterations.(models)`: a vector of iteration counts for the
+- `iterations=TumorGrowth.iterations.(models)`: a vector of iteration counts for the
   calibration of `models`
 
 - `calibration_options`: a vector of named tuples providing keyword arguments for the
@@ -151,7 +151,7 @@ function errors(
     models,
     holdouts,
     options,
-    n_iterations,
+    iterations,
     plot,
     )
     times = etimes[1:end-holdouts]
@@ -165,8 +165,8 @@ function errors(
         i += 1
         problem = CalibrationProblem(times, volumes, model;  options[i]...)
         optimiser = TumorGrowth.optimiser(problem)
-        n_iter = isnothing(n_iterations[i]) ? n_iterations_default(model, optimiser) :
-            n_iterations[i]
+        n_iter = isnothing(iterations[i]) ? iterations_default(model, optimiser) :
+            iterations[i]
         push!(actual_iterations, n_iter)
         if n_iter > 0
             step =

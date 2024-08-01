@@ -46,5 +46,5 @@ end
 lower_default(model::typeof(bertalanffy)) = lower_default(classical_bertalanffy)
 penalty_default(::typeof(bertalanffy)) = 0.8
 
-n_iterations_default(::typeof(bertalanffy), optimiser) = 20000
-n_iterations_default(::typeof(bertalanffy), optimiser::GaussNewtonOptimiser) = 0
+iterations_default(::typeof(bertalanffy), optimiser) = 20000
+iterations_default(::typeof(bertalanffy), optimiser::GaussNewtonOptimiser) = 0

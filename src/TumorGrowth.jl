@@ -41,11 +41,6 @@ solver can be passed to the model call.
 TumorGrowth.jl also provides a [`CalibrationProblem`](@ref) tool to calibrate model
 parameters, and a [`compare`](@ref) tool to compare models on a holdout set.
 
-Calibration is performed using a gradient descent optimiser to
-minimise a (possibly weighted) least-squares error on provided clinical measurements, and
-uses the adjoint method to auto-differentiate solutions to the underlying ODE's, with
-respect to the ODE parameters, and initial conditions to be optimised.
-
 """
 module TumorGrowth
 
