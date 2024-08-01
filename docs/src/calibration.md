@@ -1,6 +1,7 @@
 # Calibration
 
-For a basic example, see the [`CalibrationProblem`](@ref) document string below. For an exteneded workflow, see [Calibration workflows](@ref). 
+For a basic example, see the [`CalibrationProblem`](@ref) document string below. For an
+extended workflow, see [Calibration workflows](@ref).
 
 ## Overview
 
