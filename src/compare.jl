@@ -94,9 +94,6 @@ julia> gompertz(times, p)
  3.922743006690166e-5
 ```
 
-When a model parameter becomes out of bounds, calibration stops early and the last
-in-bounds value is reported.
-
 # Visualising comparisons
 
 ```julia
