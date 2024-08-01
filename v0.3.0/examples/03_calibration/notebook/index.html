@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Calibration workflows · TumorGrowth.jl</title><meta name="title" content="Calibration workflows · TumorGrowth.jl"/><meta property="og:title" content="Calibration workflows · TumorGrowth.jl"/><meta property="twitter:title" content="Calibration workflows · TumorGrowth.jl"/><meta name="description" content="Documentation for TumorGrowth.jl."/><meta property="og:description" content="Documentation for TumorGrowth.jl."/><meta property="twitter:description" content="Documentation for TumorGrowth.jl."/><script data-outdated-warner src="../../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../../assets/documenter.js"></script><script src="../../../search_index.js"></script><script src="../../../siteinfo.js"></script><script src="../../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../../">TumorGrowth.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../../">Overview</a></li><li><a class="tocitem" href="../../../installation/">Installation</a></li><li><a class="tocitem" href="../../../quick_start/">Quick start</a></li><li><a class="tocitem" href="../../../calibration/">Calibration</a></li><li><a class="tocitem" href="../../../comparison/">Model comparison</a></li><li><span class="tocitem">Extended examples</span><ul><li class="is-active"><a class="tocitem" href>Calibration workflows</a><ul class="internal"><li><a class="tocitem" href="#Data-ingestion"><span>Data ingestion</span></a></li><li><a class="tocitem" href="#Helpers"><span>Helpers</span></a></li><li><a class="tocitem" href="#Patient-A-a-volume-that-is-mostly-decreasiing"><span>Patient A - a volume that is mostly decreasiing</span></a></li><li><a class="tocitem" href="#Patient-B-relapse-following-initial-improvement"><span>Patient B - relapse following initial improvement</span></a></li></ul></li><li><a class="tocitem" href="../../04_model_battle/notebook/">Model battle</a></li></ul></li><li><a class="tocitem" href="../../../api/">Adding new models</a></li><li><a class="tocitem" href="../../../reference/">Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Extended examples</a></li><li class="is-active"><a href>Calibration workflows</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Calibration workflows</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/ablaom/TumorGrowth.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/ablaom/TumorGrowth.jl/blob/dev/docs/src/examples/03_calibration/notebook.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Calibration-workflows"><a class="docs-heading-anchor" href="#Calibration-workflows">Calibration workflows</a><a id="Calibration-workflows-1"></a><a class="docs-heading-anchor-permalink" href="#Calibration-workflows" title="Permalink"></a></h1><p>The code below is also available in <a href="https://github.com/ablaom/TumorGrowth.jl/tree/dev/docs/src/examples/03_calibration/">notebook</a> form.</p><pre><code class="language- hljs">dir = @__DIR__
+
+using TumorGrowth
+using Statistics
+using Plots
+using IterationControl
+
+Plots.scalefontsizes() # reset font sizes
+Plots.scalefontsizes(0.85)</code></pre><pre><code class="nohighlight hljs">  Activating project at `~/GoogleDrive/Julia/TumorGrowth/docs/src/examples/03_calibration`
+</code></pre><h2 id="Data-ingestion"><a class="docs-heading-anchor" href="#Data-ingestion">Data ingestion</a><a id="Data-ingestion-1"></a><a class="docs-heading-anchor-permalink" href="#Data-ingestion" title="Permalink"></a></h2><p>Get the records which have a least 6 measurements:</p><pre><code class="language- hljs">records = patient_data();
+records6 = filter(records) do record
+    record.readings &gt;= 6
+end;</code></pre><h2 id="Helpers"><a class="docs-heading-anchor" href="#Helpers">Helpers</a><a id="Helpers-1"></a><a class="docs-heading-anchor-permalink" href="#Helpers" title="Permalink"></a></h2><p>Wrapper to only apply control every 100 steps:</p><pre><code class="language- hljs">sometimes(control) = IterationControl.skip(control, predicate=100)</code></pre><pre><code class="nohighlight hljs">sometimes (generic function with 1 method)</code></pre><p>Wrapper to only apply control after first 30 steps:</p><pre><code class="language- hljs">warmup(control) = IterationControl.Warmup(control, 30)</code></pre><pre><code class="nohighlight hljs">warmup (generic function with 1 method)</code></pre><h2 id="Patient-A-a-volume-that-is-mostly-decreasiing"><a class="docs-heading-anchor" href="#Patient-A-a-volume-that-is-mostly-decreasiing">Patient A - a volume that is mostly decreasiing</a><a id="Patient-A-a-volume-that-is-mostly-decreasiing-1"></a><a class="docs-heading-anchor-permalink" href="#Patient-A-a-volume-that-is-mostly-decreasiing" title="Permalink"></a></h2><pre><code class="language- hljs">record = records6[2]</code></pre><pre><code class="nohighlight hljs">(Pt_hashID = &quot;19ce84cc1b10000b63820280995107c2-S1&quot;, Study_Arm = InlineStrings.String15(&quot;Study_1_Arm_1&quot;), Study_id = 1, Arm_id = 1, T_weeks = [0.1, 6.0, 16.0, 24.0, 32.0, 39.0], T_days = [-12, 38, 106, 166, 222, 270], Lesion_diam = [14.0, 10.0, 9.0, 8.0, 8.0, 8.0], Lesion_vol = [1426.88, 520.0, 379.08, 266.24, 266.24, 266.24], Lesion_normvol = [0.000231515230057292, 8.4371439525252e-5, 6.15067794139087e-5, 4.3198177036929e-5, 4.3198177036929e-5, 4.3198177036929e-5], response = InlineStrings.String7(&quot;down&quot;), readings = 6)</code></pre><pre><code class="language- hljs">times = record.T_weeks
+volumes = record.Lesion_normvol;</code></pre><p>We&#39;ll try calibrating the generalized Bertalanffy model, <code>bertalanffy</code>, with fixed parameter <code>λ=1/5</code>:</p><pre><code class="language- hljs">problem = CalibrationProblem(
+    times,
+    volumes,
+    bertalanffy;
+    frozen=(; λ=1/5),
+    learning_rate=0.001,
+    half_life=21, # place greater weight on recent measurements
+)</code></pre><pre><code class="nohighlight hljs">CalibrationProblem: 
+  model: bertalanffy
+  current solution: v0=0.000232  v∞=4.32e-5  ω=0.0432  λ=0.2</code></pre><p>The controls in the <code>solve!</code> call below have the following interpretations:</p><ul><li><code>Step(1)</code>: compute 1 iteration at a time</li><li><code>InvalidValue()</code>: to catch parameters going out of bounds</li><li><code>NumberLimit(6000)</code>: stop after 6000 steps</li><li><code>GL() |&gt; warmup</code>:  stop using Prechelt&#39;s GL criterion after the warm-up period</li><li><code>NumberSinceBest(10) |&gt; warmup</code>:  stop when it&#39;s 10 steps since the best so far</li><li><code>Callback(prob-&gt; (plot(prob); gui())) |&gt; sometimes</code>: periodically plot the problem</li></ul><p>Some other possible controls are:</p><ul><li><code>TimeLimit(1/60)</code>: stop after 1 minute</li><li><code>WithLossDo()</code>: log to <code>Info</code> the current loss</li></ul><p>See <a href="https://github.com/JuliaAI/IterationControl.jl?tab=readme-ov-file#controls-provided">IterationControl.jl</a> for a complete list.</p><pre><code class="language- hljs">solve!(
+    problem,
+    Step(1),
+    InvalidValue(),
+    NumberLimit(6000),
+    GL() |&gt; warmup,
+    NumberSinceBest(10)  |&gt; warmup,
+    Callback(prob-&gt; (plot(prob); gui())) |&gt; sometimes,
+)
+gui()</code></pre><pre><code class="nohighlight hljs">[ Info: final loss: 5.190581338811233e-10
+[ Info: Stop triggered by NumberLimit(6000) stopping criterion. 
+</code></pre><pre><code class="language- hljs">p = solution(problem)
+extended_times = vcat(times, [40.0, 47.0])
+bertalanffy(extended_times, p)</code></pre><pre><code class="nohighlight hljs">8-element Vector{Float64}:
+ 0.00022152247503693192
+ 0.0001180049861840984
+ 5.990483693858979e-5
+ 4.433878258915783e-5
+ 3.731322416306445e-5
+ 3.4181697237280434e-5
+ 3.386717191488983e-5
+ 3.225813777978713e-5</code></pre><pre><code class="language- hljs">plot(problem, title=&quot;Patient A, λ=1/5 fixed&quot;, color=:black)
+gui()</code></pre><p><img src="../patientA.png" alt/></p><pre><code class="language- hljs">savefig(joinpath(dir, &quot;patientA.png&quot;))</code></pre><pre><code class="nohighlight hljs">&quot;/Users/anthony/GoogleDrive/Julia/TumorGrowth/docs/src/examples/03_calibration/patientA.png&quot;</code></pre><h2 id="Patient-B-relapse-following-initial-improvement"><a class="docs-heading-anchor" href="#Patient-B-relapse-following-initial-improvement">Patient B - relapse following initial improvement</a><a id="Patient-B-relapse-following-initial-improvement-1"></a><a class="docs-heading-anchor-permalink" href="#Patient-B-relapse-following-initial-improvement" title="Permalink"></a></h2><pre><code class="language- hljs">record = records6[10]
+
+times = record.T_weeks
+volumes = record.Lesion_normvol;</code></pre><p>We&#39;ll first try the earlier simple model, but we won&#39;t freeze <code>λ</code>. Also, we won&#39;t specify a <code>half_life</code>, giving all the data equal weight.</p><pre><code class="language- hljs">problem = CalibrationProblem(
+    times,
+    volumes,
+    bertalanffy;
+    learning_rate=0.001,
+)
+
+solve!(
+    problem,
+    Step(1),
+    InvalidValue(),
+    NumberLimit(6000),
+)
+plot(problem, label=&quot;bertalanffy&quot;)
+gui()</code></pre><pre><code class="nohighlight hljs">[ Info: final loss: 0.00010518082495583373
+[ Info: Stop triggered by NumberLimit(6000) stopping criterion. 
+</code></pre><p>Let&#39;s try the 2D generalization of the generalized Bertalanffy model:</p><pre><code class="language- hljs">problem = CalibrationProblem(
+    times,
+    volumes,
+    bertalanffy2;
+    learning_rate=0.001,
+)
+
+solve!(
+    problem,
+    Step(1),
+    InvalidValue(),
+    NumberLimit(6000),
+)
+plot!(problem, label=&quot;bertalanffy2&quot;)
+gui()</code></pre><p>(Plot appears below.)</p><pre><code class="nohighlight hljs">[ Info: final loss: 0.0001486220557414735
+[ Info: Stop triggered by NumberLimit(1000) stopping criterion. 
+[ Info: final loss: 0.0001486220557414735
+[ Info: Stop triggered by NumberLimit(1000) stopping criterion. 
+[ Info: final loss: 1.0981748197354352e-5
+[ Info: Stop triggered by NumberLimit(6000) stopping criterion. 
+</code></pre><p>Here&#39;s how we can inspect the final parameters:</p><pre><code class="language- hljs">solution(problem)</code></pre><pre><code class="nohighlight hljs">(v0 = 0.013418165323626751, v∞ = 0.0003759183541925138, ω = 0.12123897563008784, λ = 1.0752692228665386, γ = 0.7251887879657256)</code></pre><p>Or we can do:</p><pre><code class="language- hljs">solution(problem) |&gt; pretty</code></pre><pre><code class="nohighlight hljs">&quot;v0=0.0134  v∞=0.000376  ω=0.121  λ=1.08  γ=0.725&quot;</code></pre><p>And finally, we&#39;ll try a 2D neural ODE model, with fixed volume scale <code>v∞</code>.</p><pre><code class="language- hljs">using Lux, Random</code></pre><p><em>Note well</em> the zero-initialization of weights in first layer:</p><pre><code class="language- hljs">network2 = Chain(
+    Dense(2, 2, Lux.tanh, init_weight=Lux.zeros64),
+    Dense(2, 2),
+)</code></pre><pre><code class="nohighlight hljs">Chain(
+    layer_1 = Dense(2 =&gt; 2, tanh_fast),  # 6 parameters
+    layer_2 = Dense(2 =&gt; 2),            # 6 parameters
+)         # Total: 12 parameters,
+          #        plus 0 states.</code></pre><p>Notice this network has a total of 12 parameters. To that we&#39;ll be adding the initial value <code>u0</code> of the latent variable. So this is a model with relatively high complexity for this problem.</p><pre><code class="language- hljs">n2 = neural2(Xoshiro(123), network2) # `Xoshiro` is a random number generator</code></pre><pre><code class="nohighlight hljs">Neural2 model, (times, p) -&gt; volumes, where length(p) = 14
+  transform: log</code></pre><p>Note the reduced learning rate.</p><pre><code class="language- hljs">v∞ = mean(volumes)
+
+problem = CalibrationProblem(
+    times,
+    volumes,
+    n2;
+    frozen = (; v∞),
+    learning_rate=0.001,
+)
+
+solve!(
+    problem,
+    Step(1),
+    InvalidValue(),
+    NumberLimit(6000),
+)
+plot!(
+    problem,
+    title = &quot;Model comparison for Patient B&quot;,
+    label = &quot;neural2&quot;,
+    legend=:inside,
+)
+gui()</code></pre><pre><code class="nohighlight hljs">[ Info: final loss: 4.9467503956431245e-6
+[ Info: Stop triggered by NumberLimit(6000) stopping criterion. 
+</code></pre><p><img src="../patientB.png" alt/></p><pre><code class="language- hljs">savefig(joinpath(dir, &quot;patientB.png&quot;))</code></pre><pre><code class="nohighlight hljs">&quot;/Users/anthony/GoogleDrive/Julia/TumorGrowth/docs/src/examples/03_calibration/patientB.png&quot;</code></pre><p>For a more principled comparison, we compare the models on a holdout set. We&#39;ll additionally throw in 1D neural ODE model.</p><pre><code class="language- hljs">network1 = Chain(
+    Dense(1, 3, Lux.tanh, init_weight=Lux.zeros64),
+    Dense(3, 1),
+)
+
+n1 = neural(Xoshiro(123), network1)
+
+models = [bertalanffy, bertalanffy2, n1, n2]
+calibration_options = [
+    (frozen = (; λ=1/5), learning_rate=0.001, half_life=21), # bertalanffy
+    (frozen = (; λ=1/5), learning_rate=0.001, half_life=21), # bertalanffy2
+    (frozen = (; v∞), learning_rate=0.001, half_life=21), # neural
+    (frozen = (; v∞), learning_rate=0.001, half_life=21), # neural2
+]
+n_iterations = [6000, 6000, 6000, 6000]
+comparison = compare(times, volumes, models; calibration_options, n_iterations)</code></pre><pre><code class="nohighlight hljs">ModelComparison with 3 holdouts:
+  metric: mae
+  bertalanffy: 	0.004676
+  bertalanffy2: 	0.002197
+  neural (12 params): 	0.004685
+  neural2 (14 params): 	0.004147</code></pre><pre><code class="language- hljs">plot(comparison)
+gui()</code></pre><p><img src="../patientB_validation.png" alt/></p><pre><code class="language- hljs">savefig(joinpath(dir, &quot;patientB_validation.png&quot;))</code></pre><pre><code class="nohighlight hljs">&quot;/Users/anthony/GoogleDrive/Julia/TumorGrowth/docs/src/examples/03_calibration/patientB_validation.png&quot;</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../../comparison/">« Model comparison</a><a class="docs-footer-nextpage" href="../../04_model_battle/notebook/">Model battle »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.5.0 on <span class="colophon-date" title="Thursday 1 August 2024 21:00">Thursday 1 August 2024</span>. Using Julia version 1.10.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
