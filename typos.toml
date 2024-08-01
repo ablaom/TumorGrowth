@@ -1,5 +1,5 @@
 [default.extend-words]
 # Don't correct "mape" to "map"
 mape = "mape"
-# Don't correct "yhat" to "that"
 yhat = "yhat"
+LSO ="LSO"
