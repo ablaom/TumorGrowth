@@ -9,21 +9,21 @@ volumes = record.Lesion_normvol  # volumes normalized by max over dataset
 problem = CalibrationProblem(times, volumes, bertalanffy)
 solve!(problem, 2000)  # apply 2000 iterations of the calibration algorithm
 p = solution(problem)
-pretty(p)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">&quot;v0=0.0128  v∞=0.00543  ω=0.15  λ=0.116&quot;</code></pre><p>For advanced  options, see <a href="../calibration/#TumorGrowth.CalibrationProblem"><code>CalibrationProblem</code></a> or the <a href="../examples/03_calibration/notebook/#Calibration-workflows">Calibration workflows</a> extended example. </p><p>We can visualize the outcome and make predictions for an extended time period:</p><pre><code class="language-julia hljs">using Plots
+pretty(p)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">&quot;v0=0.0103  v∞=0.00609  ω=0.141  λ=0.114&quot;</code></pre><p>For advanced  options, see <a href="../calibration/#TumorGrowth.CalibrationProblem"><code>CalibrationProblem</code></a> or the <a href="../examples/03_calibration/notebook/#Calibration-workflows">Calibration workflows</a> extended example. </p><p>We can visualize the outcome and make predictions for an extended time period:</p><pre><code class="language-julia hljs">using Plots
 plot(problem)</code></pre><p><img src="../assets/bertalanffy.png" alt/></p><pre><code class="language-julia hljs">extended_times = vcat(times, [46.0, 53.1])
 bertalanffy(extended_times, p)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">11-element Vector{Float64}:
- 0.012786613474458523
- 0.00780654303325098
- 0.006303945918353933
- 0.0057717762221007815
- 0.005548517906845849
- 0.005486703272401006
- 0.005457786943779901
- 0.0054425193897102014
- 0.005436340985449626
- 0.005437024733865962
- 0.005433812667343673</code></pre><p>And compare several models on a holdout set:</p><pre><code class="language-julia hljs">comparison = compare(times, volumes, [bertalanffy, logistic, bertalanffy2], holdouts=2)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">ModelComparison with 2 holdouts:
+ 0.010256085678952396
+ 0.007674823296423271
+ 0.0067335824768277285
+ 0.0063615647961514305
+ 0.006192294079198997
+ 0.006142130249558573
+ 0.006117447950274238
+ 0.006103706497416394
+ 0.006097809709389035
+ 0.006098481127543786
+ 0.006095250529578092</code></pre><p>And compare several models on a holdout set:</p><pre><code class="language-julia hljs">comparison = compare(times, volumes, [bertalanffy, logistic, bertalanffy2], holdouts=2)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">ModelComparison with 2 holdouts:
   metric: mae
   bertalanffy: 	0.006516
   logistic: 	0.006485
-  bertalanffy2: 	0.005364</code></pre><pre><code class="language-julia hljs">plot(comparison)</code></pre><p><img src="../assets/comparison.png" alt/></p><p>See <a href="../comparison/#TumorGrowth.compare"><code>compare</code></a> for more options.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../installation/">« Installation</a><a class="docs-footer-nextpage" href="../calibration/">Calibration »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.5.0 on <span class="colophon-date" title="Tuesday 23 July 2024 00:24">Tuesday 23 July 2024</span>. Using Julia version 1.10.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+  bertalanffy2: 	0.005364</code></pre><pre><code class="language-julia hljs">plot(comparison)</code></pre><p><img src="../assets/comparison.png" alt/></p><p>See <a href="../comparison/#TumorGrowth.compare"><code>compare</code></a> for more options.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../installation/">« Installation</a><a class="docs-footer-nextpage" href="../calibration/">Calibration »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.5.0 on <span class="colophon-date" title="Thursday 1 August 2024 04:38">Thursday 1 August 2024</span>. Using Julia version 1.10.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
