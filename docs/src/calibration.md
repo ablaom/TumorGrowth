@@ -1,5 +1,9 @@
 # Calibration
 
+For a basic example, see the [`CalibrationProblem`](@ref) document string below. For an exteneded workflow, see [Calibration workflows](@ref). 
+
+## Overview
+
 By default, calibration is performed using a gradient descent optimiser to minimise a
 least-squares error on provided clinical measurements, and uses the adjoint method to
 auto-differentiate solutions to the underlying ODE's, with respect to the ODE parameters,
@@ -7,7 +11,7 @@ and initial conditions to be optimised. Alternatively, Levengerg-Marquardt or Po
 leg optimisation may be employed. This can be faster for the smaller models, but enjoys
 fewer features.
 
-## Gradient descent optimisation
+### Gradient descent optimisation
 
 Calibration using a gradient descent optimiser has these advantages:
 
@@ -29,11 +33,13 @@ Calibration using a gradient descent optimiser has these advantages:
 By default, optimisation is by gradient descent using Adaptive Moment Estimation and a
 user-specifiable `learning_rate`.
 
-## Levengerg-Marquardt / dog leg optimisation
+### Levengerg-Marquardt / dog leg optimisation
 
 The main advantage of these methods is that they are faster for all the models currently
 provided, with the exception of large neural ODE models. Users can specify an initial
 `trust_region_radius` to mitigate instability.
+
+## Usage
 
 ```@docs
 CalibrationProblem
