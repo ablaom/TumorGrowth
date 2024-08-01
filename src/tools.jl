@@ -29,7 +29,7 @@ end
 """
     WeightedL2Loss(times, h=Inf)
 
-*Private method.*
+**Private method.**
 
 Return a weighted sum of squares loss function `(ŷ, y) -> loss`, where the weights decay
 in reverse time with a half life `h`.
@@ -83,7 +83,7 @@ end
 """
     TumorGrowth.merge(x, y::NamedTuple)
 
-*Private method.*
+**Private method.**
 
 Ordinary merge if `x` is also a named tuple. More generally, first deconstruct `x` using
 `TumorGrowth.functor`, merge as usual, and reconstruct.
