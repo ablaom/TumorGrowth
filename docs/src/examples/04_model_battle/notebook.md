@@ -17,7 +17,7 @@ mathematical models for prediction of response to chemotherapy and immunotherapy
 Computational Biology*". In particular, we determine whether differences observed are
 statistically significant.
 
-In addition to classical models, we include a 2D generalization of the generalized
+In addition to classical models, we include a 2D generalization of the General
 Bertalanffy model, `bertalanffy2`, and some 1D and 2D neural ODE's. The 2D models still
 model a single lesion feature, namely it's volume, but add a second latent variable
 coupled to the volume, effectively making the model second order. For further details,
@@ -28,7 +28,7 @@ documentation](https://ablaom.github.io/TumorGrowth.jl/dev/).
 
 We needed to eliminate about 10% of patient records because of failure of the neural
 network models to converge before parameters went out of bounds. A bootstrap comparison
-of the differences in mean absolute errors suggest that the generalized Bertalanffy model
+of the differences in mean absolute errors suggest that the General Bertalanffy model
 performs significantly better than all other models, with of the exception the 1D neural
 ODE. However, in pair-wise comparisons the neural ODE model was *not* significantly
 better than any model. Results are summarised in the table below. Arrows point to

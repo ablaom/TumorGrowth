@@ -13,7 +13,7 @@ const DOC_BERTALANFFY_ODE =
     """
     # Underlying ODE
 
-    In the generalized Bertalanffy model, the volume ``v > 0`` evolves according to the
+    In the General Bertalanffy model, the volume ``v > 0`` evolves according to the
     differential equation
 
     `` dv/dt = ω B_λ(v_∞/v) v,``

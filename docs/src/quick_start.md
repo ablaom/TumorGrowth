@@ -13,7 +13,7 @@ record = records[16]   # storing all measurements for one lesion
 keys(record)
 ```
 
-Next, we calibrate the generalized Bertalanffy model using this particular patient record:
+Next, we calibrate the General Bertalanffy model using this particular patient record:
 
 ```@example overview
 times = record.T_weeks
