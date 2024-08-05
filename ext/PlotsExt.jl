@@ -7,14 +7,14 @@ using UnPack
 # Plots.jl linestyle options are [:auto, :solid, :dash, :dot, :dashdot, :dashdotdot]
 
 linestyle(::Any) = :solid
+linestyle(::typeof(exponential)) = :dash
 linestyle(::typeof(gompertz)) = :dashdot
-linestyle(::typeof(classical_bertalanffy)) = :dash
 linestyle(::typeof(bertalanffy)) = :solid
 linestyle(::typeof(bertalanffy2)) = :dashdotdot
 linestyle(::typeof(logistic)) = :dot
 linecolor(::Any) = :auto
+linecolor(::typeof(exponential)) = :black
 linecolor(::typeof(gompertz)) = :black
-linecolor(::typeof(classical_bertalanffy)) = :black
 linecolor(::typeof(bertalanffy)) = :black
 linecolor(::typeof(bertalanffy2)) = :black
 linecolor(::typeof(logistic)) = :black

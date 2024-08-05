@@ -93,7 +93,7 @@ solve!(
   Step(1),            # apply controls every 1 iteration...
   WithLossDo(),       # print loss
   Callback(problem -> print(pretty(solution(problem)))), # print parameters
-  InvalidValue(),     # stop for ±Inf/NaN loss, incl. case of out-of-bound parameters
+  InvalidValue(),     # stop for ±Inf/NaN loss
   NumberSinceBest(5), # stop when lowest loss so far was 5 steps prior
   TimeLimit(1/60),    # stop after one minute
   NumberLimit(400),   # stop after 400 steps
