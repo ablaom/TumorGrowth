@@ -11,7 +11,7 @@ end
 """
     bertalanffy(times, p)
 
-Return volumes for specified `times`, based on the analytic solution to the generalized
+Return volumes for specified `times`, based on the analytic solution to the General
 Bertalanffy model for lesion growth.  $(DOC_PARAMS(4, :bertalanffy_ode)). Other parameters
 are explained below.
 

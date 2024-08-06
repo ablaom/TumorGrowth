@@ -13,7 +13,7 @@ end
 """
     bertalanffy_ode(v, p, t)
 
-Based on the generalized Bertalanffy model, return the rate in change in volume at time
+Based on the General Bertalanffy model, return the rate in change in volume at time
 `t`, for a current volume of `v`. For details, see [`bertalanffy`](@ref).
 
 Note here that `v`, and the return value, are *vectors* with a single element, rather than
@@ -29,7 +29,7 @@ end
 """
     bertalanffy2_ode!(dX, X, p, t)
 
-A two-dimensional extension of the ODE describing the generalized Bertalanffy model for
+A two-dimensional extension of the ODE describing the General Bertalanffy model for
 lesion growth.  Here `X = [v, u]`, where `v` is volume at time `t` and `u` is the
 "carrying capacity" at time `t`, a latent variable. The time derivatives are written to
 `dX`. For the specific form of the ODE, see [`bertalanffy2`](@ref).

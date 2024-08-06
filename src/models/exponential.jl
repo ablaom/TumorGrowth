@@ -27,8 +27,16 @@ end
 
 function guess_parameters(times, volumes, ::typeof(exponential))
     v0 = first(volumes)
-    ys = log.(volumes)
-    ω = -TumorGrowth.slope(times, ys)
+    mask = volumes .> eps(float(eltype(volumes)))
+    all(broadcast(!, mask)) && throw(ERR_VOLUMES_TOO_SMALL)
+    volumes = volumes[mask]
+    if length(volumes) > 1
+        times = times[mask]
+        ys = log.(volumes)
+        ω = -TumorGrowth.slope(times, ys)
+    else
+        ω = inv(last(times) - first(times))
+    end
     return (; v0, ω)
 end
 

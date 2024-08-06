@@ -30,6 +30,9 @@ Calibration using a gradient descent optimiser has these advantages:
 
 - Convergence may be faster for models with a large number of parameters (e.g., larger
   neural ODE models)
+  
+- Models can be calibrated even if the number of observations is less than the number of
+  model parameters.
 
 By default, optimisation is by gradient descent using Adaptive Moment Estimation and a
 user-specifiable `learning_rate`.

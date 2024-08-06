@@ -13,7 +13,7 @@ const DOC_BERTALANFFY_ODE =
     """
     # Underlying ODE
 
-    In the generalized Bertalanffy model, the volume ``v > 0`` evolves according to the
+    In the General Bertalanffy model, the volume ``v > 0`` evolves according to the
     differential equation
 
     `` dv/dt = ω B_λ(v_∞/v) v,``
@@ -34,3 +34,7 @@ const DOC_BERTALANFFY_ODE =
 const DOC_SEE_ALSO = "For a list of all models see [`TumorGrowth`](@ref). "
 
 const ERR_UNORDERED_TIMES = ArgumentError("Times must specified in increasing order. ")
+
+const ERR_VOLUMES_TOO_SMALL = ArgumentError(
+    "All provided volumes are too small for meaningful calibration. "
+)

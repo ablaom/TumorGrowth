@@ -2,10 +2,10 @@
     bertalanffy2(times, p; capacity=false, solve_kwargs...)
 
 Return volumes for specified `times`, based on numerical solutions to a two-dimensional
-extension of generalized Bertalanffy model for lesion growth. $(DOC_PARAMS(5,
+extension of General Bertalanffy model for lesion growth. $(DOC_PARAMS(5,
 :bertalanffy2_ode!)).
 
-The usual generalized Bertalanffy model is recovered when `γ=0`. In that case, using
+The usual General Bertalanffy model is recovered when `γ=0`. In that case, using
 [`bertalanffy`](@ref), which is based on an analytic solution, may be preferred. Other
 parameters are explained below.
 

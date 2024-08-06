@@ -13,6 +13,11 @@ volumes = [3, 6, 15]
     @test p.v0 ≈ 3
     @test p.v∞ == 15
     @test p.ω ≈ (log(15) - log(3))/(30)
+    @test_throws(
+        TumorGrowth.ERR_VOLUMES_TOO_SMALL,
+        TumorGrowth.guess_parameters(times, [0, 0, 0], gompertz),
+    )
+    @test TumorGrowth.guess_parameters(times, [0, 1, 0], gompertz).ω ≈ 1/30
 
     # one-dimensional TumorGrowth.
     p = TumorGrowth.guess_parameters(times, volumes, bertalanffy)
@@ -32,6 +37,11 @@ volumes = [3, 6, 15]
     @test length(p) == 2
     @test p.v0 ≈ exp(times[1])
     @test p.ω ≈ -1.0
+    @test_throws(
+        TumorGrowth.ERR_VOLUMES_TOO_SMALL,
+        TumorGrowth.guess_parameters(times, [0, 0, 0], exponential),
+    )
+    @test TumorGrowth.guess_parameters(times, [0, 1, 0], exponential).ω ≈ 1/30
 
     # fallback:
     @test isnothing(TumorGrowth.guess_parameters(times, volumes, "junk"))
