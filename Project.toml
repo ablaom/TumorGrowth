@@ -1,7 +1,7 @@
 name = "TumorGrowth"
 uuid = "f6b3d34e-977a-4e7e-a738-d5ddf4b5a606"
 authors = ["Anthony D. Blaom <anthony.blaom@gmail.com>"]
-version = "0.3.0"
+version = "0.3.1"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"

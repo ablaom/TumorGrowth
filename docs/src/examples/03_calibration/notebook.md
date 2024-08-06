@@ -73,7 +73,7 @@ times = record.T_weeks
 volumes = record.Lesion_normvol;
 ````
 
-We'll try calibrating the generalized Bertalanffy model, `bertalanffy`, with fixed
+We'll try calibrating the General Bertalanffy model, `bertalanffy`, with fixed
 parameter `λ=1/5`:
 
 ````@julia
@@ -198,7 +198,7 @@ gui()
 
 ````
 
-Let's try the 2D generalization of the generalized Bertalanffy model:
+Let's try the 2D generalization of the General Bertalanffy model:
 
 ````@julia
 problem = CalibrationProblem(

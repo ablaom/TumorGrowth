@@ -4,11 +4,11 @@ TumorGrowth.jl provides the following models for tumor growth:
 
 | model                           | description                             | parameters, `p`       | analytic? |
 |:--------------------------------|:----------------------------------------|:----------------------|:----------|
-| [`bertalanffy`](@ref)           | generalized Bertalanffy (GB)            | `(; v0, v∞, ω, λ)`    | yes       |
-| [`bertalanffy_numerical`](@ref) | generalized Bertalanffy (testing only)  | `(; v0, v∞, ω, λ)`    | no        |
-| [`bertalanffy2`](@ref)          | 2D extension of generalized Bertalanffy | `(; v0, v∞, ω, λ, γ)` | no        |
-| [`gompertz`](@ref)              | Gompertz (GB, `λ=0`)                    | `(; v0, v∞, ω)`       | yes       |
-| [`logistic`](@ref)              | logistic/Verhulst (GB, `λ=-1`)          | `(; v0, v∞, ω)`       | yes       |
+| [`bertalanffy`](@ref)           | General Bertalanffy (GB)                | `(; v0, v∞, ω, λ)`    | yes       |
+| [`bertalanffy_numerical`](@ref) | General Bertalanffy (testing only)      | `(; v0, v∞, ω, λ)`    | no        |
+| [`bertalanffy2`](@ref)          | 2D extension of General Bertalanffy     | `(; v0, v∞, ω, λ, γ)` | no        |
+| [`gompertz`](@ref)              | classical Gompertz (GB, `λ=0`)          | `(; v0, v∞, ω)`       | yes       |
+| [`logistic`](@ref)              | classical Logistic/Verhulst (GB, `λ=-1`) | `(; v0, v∞, ω)`      | yes       |
 | [`classical_bertalanffy`](@ref) | classical Bertalanffy (GB, `λ=1/3`)     | `(; v0, v∞, ω)`       | yes       |
 | [`exponential`](@ref)           | exponential decay or growth             | `(; v0, ω)`           | yes       |
 | [`neural(rng, network)`](@ref)  | 1D neural ODE with Lux.jl `network`     | `(; v0, v∞, θ)`       | no        |

@@ -3,7 +3,7 @@
 
 *Provided for testing purposes.*
 
-Return volumes for specified `times`, based on numerical solutions to the generalized
+Return volumes for specified `times`, based on numerical solutions to the General
 Bertalanffy model for lesion growth. $(DOC_PARAMS(4, bertalanffy_ode)); `solve_kwargs` are
 optional keyword arguments for the ODE solver, `DifferentialEquations.solve`, from
 DifferentialEquations.jl.

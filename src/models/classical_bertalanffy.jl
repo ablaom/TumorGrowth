@@ -14,14 +14,17 @@ classical_bertalanffy(times, p) = bertalanffy(times, TumorGrowth.merge(p, (; λ=
 function guess_parameters(times, volumes, ::typeof(classical_bertalanffy))
     v0 = first(volumes)
     non_zero_volumes = filter(v -> v > eps(float(eltype(volumes))), volumes)
-    isempty(non_zero_volumes) &&
-        error("All provided volumes are too small for meaningful calibration. ")
+    isempty(non_zero_volumes) && throw(ERR_VOLUMES_TOO_SMALL)
     v∞ = last(non_zero_volumes)
-    τ1 = min(times...)
-    τ2 = max(times...)
-    v1 = min(non_zero_volumes...)
-    v2 = max(volumes...)
-    ω = (log(v2) - log(v1))/(τ2 - τ1)
+    if length(non_zero_volumes) == 1
+        ω = inv(last(times) - first(times))
+    else
+        τ1 = min(times...)
+        τ2 = max(times...)
+        v1 = min(non_zero_volumes...)
+        v2 = max(volumes...)
+        ω = (log(v2) - log(v1))/(τ2 - τ1)
+    end
     return (; v0, v∞, ω)
 end
 
