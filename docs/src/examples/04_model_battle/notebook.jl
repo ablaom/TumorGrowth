@@ -22,7 +22,7 @@
 
 # ## Conclusions
 
-# We needed to eliminate about 10% of patient records because of failure of the neural
+# We needed to eliminate about 2% of patient records because of failure of the neural
 # network models to converge before parameters went out of bounds. A bootstrap comparison
 # of the differences in mean absolute errors suggest that the General Bertalanffy model
 # performs significantly better than all other models, with of the exception the 1D neural
@@ -30,21 +30,20 @@
 # better than any model. Results are summarised in the table below. Arrows point to
 # bootstrap winners in the top row or first column.
 
+# |                 model | gompertz | logistic | classical_bertalanffy | bertalanffy | bertalanffy2 |   n1 | n2 |
+# |-----------------------|----------|----------|-----------------------|-------------|--------------|------|----|
+# |           exponential |        ↑ |     draw |                     ↑ |           ↑ |         draw | draw |  ← |
+# |              gompertz |      n/a |     draw |                  draw |           ↑ |         draw | draw |  ← |
+# |              logistic |     draw |      n/a |                  draw |           ↑ |         draw | draw |  ← |
+# | classical_bertalanffy |     draw |     draw |                   n/a |           ↑ |         draw | draw |  ← |
+# |           bertalanffy |        ← |        ← |                     ← |         n/a |            ← | draw |  ← |
+# |          bertalanffy2 |     draw |     draw |                  draw |           ↑ |          n/a | draw |  ← |
+# |                    n1 |     draw |     draw |                  draw |        draw |         draw |  n/a |  ← |
 
-
-# |                            | **logistic** | **classical\_bertalanffy** | **bertalanffy** | **bertalanffy2** | **1D neural** | **2D neural** |
-# |---------------------------:|-------------:|---------------------------:|----------------:|-----------------:|--------------:|--------------:|
-# |               **gompertz** |         draw |                       draw |               ↑ |             draw |          draw |             ← |
-# |               **logistic** |          n/a |                       draw |               ↑ |             draw |          draw |             ← |
-# | **classical\_bertalanffy** |         draw |                        n/a |               ↑ |             draw |          draw |             ← |
-# |            **bertalanffy** |            ← |                          ← |             n/a |                ← |          draw |             ← |
-# |           **bertalanffy2** |         draw |                       draw |               ↑ |              n/a |          draw |             ← |
-# |              **1D neural** |         draw |                       draw |            draw |             draw |           n/a |             ← |
-
-using Pkg #!md
+using Pkg
 dir = @__DIR__
-Pkg.activate(dir) #!md
-Pkg.instantiate() #!md
+Pkg.activate(dir)
+Pkg.instantiate()
 
 using Random
 using Statistics
@@ -95,56 +94,56 @@ n2 = neural2(Xoshiro(123), network2)
 # ## Models to be compared
 
 model_exs =
-    [:gompertz, :logistic, :classical_bertalanffy, :bertalanffy, :bertalanffy2, :n1, :n2]
+    [:exponential, :gompertz, :logistic, :classical_bertalanffy, :bertalanffy,
+     :bertalanffy2, :n1, :n2]
 models = eval.(model_exs)
 
 
 # ## Computing prediction errors on a holdout set
 
 holdouts = 2
-recs = records;
-errors = fill(Inf, length(recs), length(models))
+errs = fill(Inf, length(records), length(models))
 
-p = Progress(length(recs))
+p = Progress(length(records))
 
-@threads for i in eachindex(recs)
+@threads for i in eachindex(records)
     record = records[i]
     times, volumes = record.T_weeks, record.Lesion_normvol
-    comparison = compare(times, volumes, models; holdouts, flag_out_of_bounds=true)
-    errors[i,:] = TumorGrowth.errors(comparison)
+    comparison = compare(times, volumes, models; holdouts)
+    errs[i,:] = TumorGrowth.errors(comparison)
     next!(p)
 end
 finish!(p)
 
 #-
 
-serialize(joinpath(dir, "errors.jls"), errors)
+serialize(joinpath(dir, "errors.jls"), errs);
 
 # ## Bootstrap comparisons (neural ODE's excluded)
 
-# Because the neural ODE errors contain more `NaN` values (because of parameters going out
-# of bounds), we start with a comparison that excludes them.
+# Because the neural ODE errors contain more `NaN` values, we start with a comparison that
+# excludes them, discarding only those observations where `NaN` occurs in a non-neural
+# model.
 
-bad_error_rows = filter(axes(errors, 1)) do i
-    es = errors[i,1:5]
+bad_error_rows = filter(axes(errs, 1)) do i
+    es = errs[i,1:end-2]
     any(isnan, es) || any(isinf, es) || max(es...) > 0.1
 end
-proportion_bad = length(bad_error_rows)/size(errors, 1)
+proportion_bad = length(bad_error_rows)/size(errs, 1)
 @show proportion_bad
 
-# That's less than 2%. Let's remove them:
+# That's less than 0.5%. Let's remove them:
 
-good_error_rows = setdiff(axes(errors, 1), bad_error_rows);
-errors = errors[good_error_rows,:];
+good_error_rows = setdiff(axes(errs, 1), bad_error_rows);
+errs = errs[good_error_rows,:];
 
 # Errors are evidently not normally distributed (and we were not able to transform them
 # to approximately normal):
 
-plt = histogram(errors[:, 1], normalize=:pdf, alpha=0.4)
-histogram!(errors[:, 5], normalize=:pdf, alpha=0.4)
-gui()
+plt = histogram(errs[:, 1], normalize=:pdf, alpha=0.4)
+histogram!(errs[:, end-2], normalize=:pdf, alpha=0.4)
 
-#-
+# #-
 
 savefig(joinpath(dir, "errors_distribution.png"))
 
@@ -156,7 +155,7 @@ for i in 1:(length(models) - 2)
     for j in 1:(length(models) - 2)
         b = bootstrap(
             mean,
-            errors[:,i] - errors[:,j],
+            errs[:,i] - errs[:,j],
             BasicSampling(10000),
         )
         confidence_intervals[i,j] = only(confint(b, BasicConfInt(0.95)))[2:3]
@@ -165,11 +164,11 @@ end
 confidence_intervals
 
 # We can interpret the confidence intervals as  follows:
-#
+
 # - if both endpoints -ve, row index wins
-#
+
 # - if both endpoints +ve, column index wins
-#
+
 # - otherwise a draw
 
 winner_pointer(ci) = ci == (0, 0) ? "n/a" :
@@ -190,33 +189,47 @@ pretty_table(
 
 # ## Bootstrap comparison of errors (neural ODE's included)
 
-bad_error_rows = filter(axes(errors, 1)) do i
-    es = errors[i,:]
+bad_error_rows = filter(axes(errs, 1)) do i
+    es = errs[i,:]
     any(isnan, es) || any(isinf, es) || max(es...) > 0.1
 end
-proportion_bad = length(bad_error_rows)/size(errors, 1)
+proportion_bad = length(bad_error_rows)/size(errs, 1)
 @show proportion_bad
 
-# We remove the additional 10%:
+# We remove the additional 2%:
 
-good_error_rows = setdiff(axes(errors, 1), bad_error_rows);
-errors = errors[good_error_rows,:];
+good_error_rows = setdiff(axes(errs, 1), bad_error_rows);
+errs = errs[good_error_rows,:];
 
-# And proceed as before, but with all columns of `errors` (all models):
+# And proceed as before, but with all columns of `errs` (all models):
 
 confidence_intervals = Array{Any}(undef, length(models), length(models))
 for i in 1:length(models)
     for j in 1:length(models)
         b = bootstrap(
             mean,
-            errors[:,i] - errors[:,j],
+            errs[:,i] - errs[:,j],
             BasicSampling(10000),
         )
         confidence_intervals[i, j] = only(confint(b, BasicConfInt(0.95)))[2:3]
     end
 end
+
 pretty_table(
     tabular(winner_pointer.(confidence_intervals), model_exs),
     show_subheader=false,
+    tf=PrettyTables.tf_markdown, vlines=:all,
 )
 
+# The lack of statistical significance notwithstanding, here are the models, listed in
+# order of decreasing performance:
+
+zipped = collect(zip(models, vec(mean(errs, dims=1))))
+sort!(zipped, by=last)
+model, error = collect.(zip(zipped...))
+rankings = (; model, error)
+pretty_table(
+    rankings,
+    show_subheader=false,
+    tf=PrettyTables.tf_markdown, vlines=:all,
+)
