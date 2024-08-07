@@ -3,7 +3,12 @@ using TumorGrowth
 
 makedocs(;
          modules=[TumorGrowth,],
-         format=Documenter.HTML(),
+         format=Documenter.HTML(
+             size_threshold_ignore = [
+                 "examples/03_calibration/notebook.md",
+                 "examples/04_model_battle/notebook.md",
+             ]
+         ),
          pages=[
              "Overview" => "index.md",
              "Installation" => "installation.md",

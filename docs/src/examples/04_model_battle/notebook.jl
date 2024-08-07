@@ -40,10 +40,14 @@
 # |          bertalanffy2 |     draw |     draw |                  draw |           ↑ |          n/a | draw |  ← |
 # |                    n1 |     draw |     draw |                  draw |        draw |         draw |  n/a |  ← |
 
-using Pkg
-dir = @__DIR__
-Pkg.activate(dir)
-Pkg.instantiate()
+# This demonstration has been tested in the Julia package environment specified by the
+# Project.toml and Manifest.toml files located
+# [here](https://github.com/ablaom/TumorGrowth.jl/tree/dev/docs/src/examples/04_model_battle).
+
+using Pkg #hide
+dir = @__DIR__ #hide
+Pkg.activate(dir) #hide
+Pkg.instantiate() #hide
 
 using Random
 using Statistics
@@ -143,7 +147,7 @@ errs = errs[good_error_rows,:];
 plt = histogram(errs[:, 1], normalize=:pdf, alpha=0.4)
 histogram!(errs[:, end-2], normalize=:pdf, alpha=0.4)
 
-# #-
+#-
 
 savefig(joinpath(dir, "errors_distribution.png"))
 

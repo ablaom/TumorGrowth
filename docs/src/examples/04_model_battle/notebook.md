@@ -2,11 +2,14 @@
 EditURL = "notebook.jl"
 ```
 
-# Model Battle
+# [Model Battle](@id battle)
 
 The analysis below is also available in
 [notebook](https://github.com/ablaom/TumorGrowth.jl/tree/dev/docs/src/examples/04_model_battle/)
-form.
+form, and was tested in a Julia package environment specified by 
+[these](https://github.com/ablaom/TumorGrowth.jl/tree/dev/docs/src/examples/04_model_battle)
+Project.toml and Manifest.toml files.
+
 
 **Note.** The `@threads` cell in this notebook takes about 4 hours to complete on a
 2018 MacBook Pro:
@@ -45,11 +48,6 @@ bootstrap winners in the top row or first column.
 | n1                    | draw     | draw     | draw                  | draw        | draw         | n/a  | ←  |
 
 ````@julia
-using Pkg
-dir = @__DIR__
-Pkg.activate(dir)
-Pkg.instantiate()
-
 using Random
 using Statistics
 using TumorGrowth
@@ -778,8 +776,6 @@ histogram!(errs[:, end-2], normalize=:pdf, alpha=0.4)
 <path clip-path="url(#clip340)" d="M2217.25 218.585 Q2215.44 223.215 2213.73 224.627 Q2212.01 226.039 2209.14 226.039 L2205.74 226.039 L2205.74 222.474 L2208.24 222.474 Q2210 222.474 2210.97 221.64 Q2211.95 220.807 2213.13 217.705 L2213.89 215.761 L2203.4 190.252 L2207.92 190.252 L2216.02 210.529 L2224.12 190.252 L2228.64 190.252 L2217.25 218.585 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1" /><path clip-path="url(#clip340)" d="M2239.14 212.242 L2255.46 212.242 L2255.46 216.178 L2233.52 216.178 L2233.52 212.242 Q2236.18 209.488 2240.76 204.858 Q2245.37 200.205 2246.55 198.863 Q2248.8 196.34 2249.68 194.604 Q2250.58 192.844 2250.58 191.155 Q2250.58 188.4 2248.64 186.664 Q2246.71 184.928 2243.61 184.928 Q2241.41 184.928 2238.96 185.692 Q2236.53 186.455 2233.75 188.006 L2233.75 183.284 Q2236.57 182.15 2239.03 181.571 Q2241.48 180.993 2243.52 180.993 Q2248.89 180.993 2252.08 183.678 Q2255.28 186.363 2255.28 190.854 Q2255.28 192.983 2254.47 194.905 Q2253.68 196.803 2251.57 199.395 Q2251 200.067 2247.89 203.284 Q2244.79 206.479 2239.14 212.242 Z" fill="#000000" fill-rule="nonzero" fill-opacity="1" /></svg>
 
 ```
-
-#-
 
 ````@julia
 savefig(joinpath(dir, "errors_distribution.png"))
