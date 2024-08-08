@@ -2,6 +2,4 @@
 
 env = @__DIR__
 joinpath(env, "..", "generate.jl") |> include
-generate(env, execute=true)
-
-
+generate(env, execute=false)

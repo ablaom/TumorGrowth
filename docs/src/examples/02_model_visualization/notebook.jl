@@ -69,4 +69,3 @@ plot(
 
 savefig(joinpath(dir, "bertalanffy_varying_lambda.png"))
 gui()
-
