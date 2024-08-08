@@ -1,3 +1,5 @@
+# `execute` is whether to execute the Jupyter notebook. The markdown is always
+# executed.
 function generate(dir; execute=true, pluto=false)
     quote
         using Pkg
@@ -28,7 +30,7 @@ function generate(dir; execute=true, pluto=false)
             config=Dict("codefence" => Pair("````@julia", "````" )),
             # config=Dict("codefence" => Pair("````@example $outdir", "````" )),
         )
-        # remove if not executing markdown:
+        # remove if not generating markdown:
         @warn "Any figures in the notebook.md file will need to be manually inserted. "
 
         Literate.notebook(INFILE, OUTDIR, execute=false)

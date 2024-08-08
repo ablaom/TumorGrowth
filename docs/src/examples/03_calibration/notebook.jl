@@ -1,14 +1,15 @@
 # # Calibration workflows
 
-# The code below is also available in
-# [notebook](https://github.com/ablaom/TumorGrowth.jl/tree/dev/docs/src/examples/03_calibration/)
-# form.
+# This demonstration is also available in
+# [notebook](https://github.com/ablaom/TumorGrowth.jl/tree/dev/docs/src/examples/03_calibration)
+# form, and has been tested in the Julia package environment specified by
+# [these](https://github.com/ablaom/TumorGrowth.jl/tree/dev/docs/src/examples/03_calibration)
+# Project.toml and Manifest.toml files.
 
-
-using Pkg #!md
-dir = @__DIR__
-Pkg.activate(dir) #!md
-Pkg.instantiate() #!md
+using Pkg #hide
+dir = @__DIR__ #hide
+Pkg.activate(dir) #hide
+Pkg.instantiate() #hide
 
 using TumorGrowth
 using Statistics
@@ -17,6 +18,7 @@ using IterationControl
 
 Plots.scalefontsizes() # reset font sizes
 Plots.scalefontsizes(0.85)
+nothing #src
 
 # ## Data ingestion
 
@@ -87,7 +89,6 @@ solve!(
     NumberSinceBest(10)  |> warmup,
     Callback(prob-> (plot(prob); gui())) |> sometimes,
 )
-gui()
 
 #-
 
@@ -98,7 +99,6 @@ bertalanffy(extended_times, p)
 #-
 
 plot(problem, title="Patient A, λ=1/5 fixed", color=:black)
-gui()
 
 #-
 
@@ -131,7 +131,6 @@ solve!(
     NumberLimit(6000),
 )
 plot(problem, label="bertalanffy")
-gui()
 
 #-
 
@@ -151,7 +150,6 @@ solve!(
     NumberLimit(6000),
 )
 plot!(problem, label="bertalanffy2")
-gui()
 
 # Here's how we can inspect the final parameters:
 
@@ -202,7 +200,6 @@ plot!(
     label = "neural2",
     legend=:inside,
 )
-gui()
 
 #-
 
@@ -231,7 +228,6 @@ comparison = compare(times, volumes, models; calibration_options, iterations)
 #-
 
 plot(comparison)
-gui()
 
 #-
 
