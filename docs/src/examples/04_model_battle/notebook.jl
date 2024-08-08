@@ -136,7 +136,7 @@ end
 proportion_bad = length(bad_error_rows)/size(errs, 1)
 @show proportion_bad
 
-# That's less than 0.5%. Let's remove them:
+# That's less than 1%. Let's remove them:
 
 good_error_rows = setdiff(axes(errs, 1), bad_error_rows);
 errs = errs[good_error_rows,:];
@@ -187,7 +187,7 @@ tabular(A, model_exs) = NamedTuple{(:model, model_exs[2:end]...)}((
 ))
 
 pretty_table(
-    tabular(winner_pointer.(confidence_intervals), model_exs[1:5]),
+    tabular(winner_pointer.(confidence_intervals), model_exs[1:6]),
     show_subheader=false,
 )
 

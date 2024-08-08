@@ -834,21 +834,21 @@ tabular(A, model_exs) = NamedTuple{(:model, model_exs[2:end]...)}((
 ))
 
 pretty_table(
-    tabular(winner_pointer.(confidence_intervals), model_exs[1:5]),
+    tabular(winner_pointer.(confidence_intervals), model_exs[1:6]),
     show_subheader=false,
 )
 ````
 
 ````
-┌───────────────────────┬──────────┬──────────┬───────────────────────┬─────────────┐
-│                 model │ gompertz │ logistic │ classical_bertalanffy │ bertalanffy │
-├───────────────────────┼──────────┼──────────┼───────────────────────┼─────────────┤
-│           exponential │        ↑ │     draw │                     ↑ │           ↑ │
-│              gompertz │      n/a │     draw │                  draw │           ↑ │
-│              logistic │     draw │      n/a │                  draw │           ↑ │
-│ classical_bertalanffy │     draw │     draw │                   n/a │           ↑ │
-└───────────────────────┴──────────┴──────────┴───────────────────────┴─────────────┘
-
+┌───────────────────────┬──────────┬──────────┬───────────────────────┬─────────────┬──────────────┐
+│                 model │ gompertz │ logistic │ classical_bertalanffy │ bertalanffy │ bertalanffy2 │
+├───────────────────────┼──────────┼──────────┼───────────────────────┼─────────────┼──────────────┤
+│           exponential │        ↑ │     draw │                     ↑ │           ↑ │         draw │
+│              gompertz │      n/a │     draw │                  draw │           ↑ │         draw │
+│              logistic │     draw │      n/a │                  draw │           ↑ │         draw │
+│ classical_bertalanffy │     draw │     draw │                   n/a │           ↑ │            ← │
+│           bertalanffy │        ← │        ← │                     ← │         n/a │            ← │
+└───────────────────────┴──────────┴──────────┴───────────────────────┴─────────────┴──────────────┘
 ````
 
 ## Bootstrap comparison of errors (neural ODE's included)
