@@ -11,8 +11,9 @@ Pkg.add("TumorGrowth")
 Pkg.add("Plots")
 ```
 
-You should now be able to run the code in the [Quick start](@ref) or Extended
-examples sections.
+You should now be able to run the code in the [Quick start](@ref) or Extended examples
+sections. Note that the very first time you run `using TumorGrowth` can take a few
+minutes.
 
 In a new julia session you can re-activate the environment created above with:
 

@@ -144,6 +144,9 @@ end
     rng = StableRNG(127)
     network = Lux.Dense(2, 2, identity)
     model = neural2(rng, network; transform=identity, inverse=identity)
+    # hack to kill off the bias (Lux.jl v1.0 no-longer zeros the bias):
+    old = model.ode.θ0
+    model.ode.θ0 = (; weight=old.weight, bias=zeros(Float32, size(old.bias)...))
     θ = TumorGrowth.initial_parameters(model)
     times = [0.0, 0.01, 0.1, 1.0, 10.0]
     v0, v∞ = 0.00023, 0.00015
