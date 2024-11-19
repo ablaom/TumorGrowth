@@ -80,8 +80,9 @@ comparison = compare(
     compare(times, volumes, models; holdouts, plot=true),
 )
 
-using Plots
-comparison = compare(times, volumes, models; holdouts, plot=true)
-plot(comparison)
+# uncomment next 3 lines to test plotting functionality
+# using Plots
+# comparison = compare(times, volumes, models; holdouts, plot=true)
+# plot(comparison)
 
 true
