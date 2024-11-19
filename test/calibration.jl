@@ -1,8 +1,8 @@
 using Test
-using TumorGrowth
 import StableRNGs.StableRNG
 using IterationControl
 import Lux
+using TumorGrowth
 
 function normalized_absolute_difference(yhat, y)
     scale = abs(y)
@@ -72,7 +72,7 @@ mape(yhat, y) = sum(broadcast(normalized_absolute_difference, yhat, y))/length(y
         volumes_true,
         model;
         frozen = (; v∞=nothing),
-        learning_rate=0.001,
+        learning_rate=0.005,
         half_life=48.0,
     )
 
@@ -82,8 +82,8 @@ mape(yhat, y) = sum(broadcast(normalized_absolute_difference, yhat, y))/length(y
         Step(1),
         InvalidValue(),
         # TimeLimit(5/60),
-        NumberLimit(800),
-        Threshold(bertalanffy2_loss),
+        NumberLimit(10000),
+        Threshold(0.5*bertalanffy2_loss),
         # Callback(problem -> print("\r", pretty(solution(problem)))),
         # IterationControl.skip(
         #    Callback(problem->(plot(problem); gui())),

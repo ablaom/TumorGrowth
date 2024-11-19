@@ -1,7 +1,7 @@
 name = "TumorGrowth"
 uuid = "f6b3d34e-977a-4e7e-a738-d5ddf4b5a606"
 authors = ["Anthony D. Blaom <anthony.blaom@gmail.com>"]
-version = "0.3.1"
+version = "0.3.2"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
@@ -30,11 +30,11 @@ PlotsExt = "Plots"
 CSV = "0.10"
 ComponentArrays = "0.15"
 DifferentialEquations = "7"
-Functors = "0.4"
+Functors = "0.4, 0.5"
 IterationControl = "0.5"
 LeastSquaresOptim = "0.8.5"
-Lux = "0.5"
-Optimisers = "0.3"
+Lux = "1"
+Optimisers = "0.3, 0.4"
 Plots = "1"
 Random = "<0.0.1, 1"
 SciMLSensitivity = "7"
