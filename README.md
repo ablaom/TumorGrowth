@@ -10,7 +10,8 @@ Predictive models for tumor growth, and tools to apply them to clinical data
 Please refer to the [documentation](https://ablaom.github.io/TumorGrowth.jl/dev) for an
 overview of this package.
 
-Code snippet:
+
+## Code snippet
 
 ```julia
 using TumorGrowth, Lux, Random
@@ -40,9 +41,27 @@ julia> plot(comparison)
 ![comparison plot](assets/comparison.png)
 
 
-### Acknowledgements
+## Acknowledgements
 
 The datasets provided the TumorGrowth.jl software are sourced from Laleh et
 al. [(2022)](https://doi.org/10.1371/journal.pcbi.1009822) "Classical mathematical models
 for prediction of response to chemotherapy and immunotherapy", *PLOS Computational
 Biology*", with some restructuring provided by Yasin Elmaci and Okon Samuel.
+
+
+## Citing this work
+
+[![arXiv](https://img.shields.io/badge/arXiv-2502.07964-b31b1b.svg)](https://arxiv.org/abs/2502.07964)
+
+```bibtex
+@misc{blaom2025newtoolscomparingclassical,
+      title={New tools for comparing classical and neural ODE models for tumor growth}, 
+      author={Anthony D. Blaom and Samuel Okon},
+      year={2025},
+      eprint={2502.07964},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2502.07964}, 
+}
+```
+
